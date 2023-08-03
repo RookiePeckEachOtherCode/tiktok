@@ -12,7 +12,7 @@ type Video struct {
 	Author        UserInfo    `json:"author" gorm:"-"`                             // 视频作者信息
 	FavoriteCount int64       `gorm:"column:favorite_count" json:"favorite_count"` // 点赞数
 	IsFavorite    bool        `gorm:"column:is_favorite"    json:"is_favorite"`    // 是否点赞true-已点赞，false-未点赞
-	CommentCount  int64       `json:"comment_count" json:"comment_count" `         // 视频的评论总数
+	CommentCount  int64       `json:"comment_count" `                              // 视频的评论总数
 	PlayURL       string      `gorm:"column:play_url" json:"play_url"`             // 播放地址
 	CoverURL      string      `gorm:"column:cover_url" json:"cover_url"`           // 封面地址
 	Users         []*UserInfo `gorm:"many2many:user_favor_videos" json:"-"`        //点赞的用户
