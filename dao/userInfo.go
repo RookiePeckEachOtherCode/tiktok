@@ -1,5 +1,7 @@
 package dao
 
+import "errors"
+
 type UserInfo struct {
 	ID              int64  `json:"id"`               // 用户id
 	Name            string `json:"name"`             // 用户名称
@@ -13,5 +15,16 @@ type UserInfo struct {
 	Avatar          string `json:"avatar"`           // 用户头像
 	BackgroundImage string `json:"background_image"` // 用户个人页顶部大图
 	UserLoginInfo   *UserLoginInfo
-	Videos          []*Videos
+	Videos          []*Video
+}
+
+func GetUserInfoById(userId int64) (UserInfo, error) {
+	var userInfo UserInfo
+
+	DB.Where("id=?", userId).Select([]string{"id", "name", "follow_count", "follower_count", "is_follow"}).First(&userInfo)
+
+	if userInfo.ID == 0 {
+		return UserInfo{}, errors.New("该用户不存在")
+	}
+	return userInfo, nil
 }

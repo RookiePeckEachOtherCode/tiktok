@@ -1,6 +1,9 @@
 package dao
 
-import "time"
+import (
+	"tiktok/configs"
+	"time"
+)
 
 type Video struct {
 	ID            int64       `gorm:"primaryKey;column:id"  json:"id"`             // 视频ID
@@ -18,10 +21,10 @@ type Video struct {
 	UpdatedAt     time.Time   `json:"-"`
 }
 
-func GetVideoListByLastTime(limit int, lastTime time.Time) ([]*Video, error) {
-	videos := make([]*Video, 0, limit)
+func GetVideoListByLastTime(lastTime time.Time) ([]*Video, error) {
+	videos := make([]*Video, 0, configs.MAX_VIDEO_CNT)
 
-	err := DB.Model(&Video{}).Where("created_at<?", lastTime).Order("created_at ASC").Limit(limit).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).Find(&videos).Error
+	err := DB.Model(&Video{}).Where("created_at<?", lastTime).Order("created_at ASC").Limit(configs.MAX_VIDEO_CNT).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).Find(&videos).Error
 
 	return videos, err
 }
