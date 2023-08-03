@@ -11,12 +11,12 @@ func main() {
 
 }
 func Init() {
+	//初始化数据库
 	dao.InitDb()
 
 	r := gin.Default()
 
-	apiGroup := r.Group("/douyin")
+	initRouter(r)
 
-	apiGroup.GET("/feed")
 	r.Run()
 }
