@@ -1,6 +1,7 @@
 package main
 
 import (
+	"tiktok/controller"
 	"tiktok/dao"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,9 @@ func Init() {
 
 	r := gin.Default()
 
-	initRouter(r)
+	apiGroup := r.Group("/douyin")
+
+	apiGroup.GET("/feed", controller.Feed)
 
 	r.Run()
 }

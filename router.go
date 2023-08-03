@@ -1,9 +1,13 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"tiktok/controller"
 
-func initRouter(r *gin.Engine) {
+	"github.com/gin-gonic/gin"
+)
+
+func InitRouter(r *gin.Engine) {
 	apiGroup := r.Group("/douyin")
 
-	apiGroup.GET("/feed")
+	apiGroup.GET("/feed", controller.Feed)
 }
