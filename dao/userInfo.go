@@ -13,5 +13,5 @@ type UserInfo struct {
 	Avatar          string `json:"avatar"`           // 用户头像
 	BackgroundImage string `json:"background_image"` // 用户个人页顶部大图
 	UserLoginInfo   *UserLoginInfo
-	Videos          []*Videos
+	Videos          []*Video
 }
