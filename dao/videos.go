@@ -21,6 +21,7 @@ type Video struct {
 	UpdatedAt     time.Time   `json:"-"`
 }
 
+// GetVideoListByLastTime 根据上传时间获取视频列表
 func GetVideoListByLastTime(lastTime time.Time) ([]*Video, error) {
 	videos := make([]*Video, 0, configs.MAX_VIDEO_CNT)
 

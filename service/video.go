@@ -6,17 +6,20 @@ import (
 	"time"
 )
 
+// Respons 包含状态码、状态描述和视频流信息
 type Respons struct {
 	StatusCode int64   `json:"status_code"` // 状态码，0-成功，其他值-失败
 	StatusMsg  *string `json:"status_msg"`  // 返回状态描述
 	FeedVideoFlow
 }
 
+// FeedVideoFlow 包含下次请求的最早发布时间和视频列表
 type FeedVideoFlow struct {
 	NextTime  int64        `json:"next_time"`  //发布最早的时间，作为下次请求时的latest_time
 	VideoList []*dao.Video `json:"video_list"` //视频列表
 }
 
+// GetFeedVideoListFlow 包含最新时间、用户ID、视频列表、视频流信息和下次请求的最早发布时间
 type GetFeedVideoListFlow struct {
 	latestTime time.Time
 	userId     int64
@@ -25,12 +28,13 @@ type GetFeedVideoListFlow struct {
 	nextTime   int64
 }
 
+// Feed 返回视频流信息
 func Feed(lastTime time.Time, userId int64) (*FeedVideoFlow, error) {
 	getFlow := GetFeedVideoListFlow{latestTime: lastTime, userId: userId}
 	return getFlow.Do()
 }
 
-// 流程处理方式
+// Do 处理视频流信息
 func (g *GetFeedVideoListFlow) Do() (*FeedVideoFlow, error) {
 	if err := g.Init(); err != nil {
 		return nil, err
@@ -41,6 +45,7 @@ func (g *GetFeedVideoListFlow) Do() (*FeedVideoFlow, error) {
 	return g.feedVideo, nil
 }
 
+// Init 初始化视频列表和下次请求的最早发布时间
 func (g *GetFeedVideoListFlow) Init() error {
 	//TODO 给视频添加点赞状态
 	//TODO 给登陆的用户 添加视频点赞的状态
@@ -63,6 +68,7 @@ func (g *GetFeedVideoListFlow) Init() error {
 	return nil
 }
 
+// Pack 打包视频流信息
 func (g *GetFeedVideoListFlow) Pack() error {
 	g.feedVideo = &FeedVideoFlow{
 		NextTime:  g.nextTime,

@@ -11,6 +11,7 @@ import (
 
 var DB *gorm.DB
 
+// InitDb 初始化数据库连接
 func InitDb() {
 	var err error
 	dsn := configs.GetDBInfo()

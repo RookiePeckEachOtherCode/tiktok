@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+// UpdateVideoInfo 更新视频信息
+// userId: 用户ID
+// videos: 视频列表
+// 返回值:
+// - latestTime: 最新视频的创建时间
+// - error: 错误信息
 func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 	if videos == nil {
 		return nil, errors.New("[UpdateVideoInfo] video is nil")
