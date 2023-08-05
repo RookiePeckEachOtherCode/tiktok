@@ -9,8 +9,8 @@
 > :white_check_mark: 完成
 
 - 基础接口
-  - :construction: 视频流接口[feed/]
-  - :warning: 用户注册[user/register/]
+  - :white_check_mark: 视频流接口[feed/]
+  - :construction: 用户注册[user/register/]
   - :warning: 用户登录[user/login/]
   - :warning: 用户信息[user/]
   - :warning: 投稿接口[publish/action/]
