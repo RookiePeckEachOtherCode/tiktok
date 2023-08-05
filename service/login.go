@@ -1,58 +1,53 @@
+// package service
 package service
 
 import (
-	"tiktok/controller"
+	"errors"
+	"fmt"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
-	"tiktok/model"
 )
 
-type Gets struct {
-	Response model.Response
-	Token    *string `json:"token"`   // 用户鉴权token
-	UserID   *int64  `json:"user_id"` // 用户id
+type LoginRespons struct {
+	userId int64
+	token  string
 }
 
-func Handlelogin(messge controller.LoginMessge) (*Gets, error) {
-	userLoginInfo, err := dao.JudgeUserPassword(messge) //验证登录信息，并返回登录信息
-	if err != nil {
-		return &Gets{
-			Response: model.Response(struct {
-				StatusCode int32
-				StatusMsg  string
-			}{StatusCode: 0, StatusMsg: "登录失败，用户名或密码错误"}),
-			Token:  nil,
-			UserID: nil,
-		}, err
+func Handlelogin(userName, password string) (string, int64, error) {
+	if err := check(userName, password); err != nil {
+		return "", 0, err
 	}
-	userInfo, err := dao.GetUserInfoById(userLoginInfo.UserInfoID) //获取用户信息
+
+	userId, err := dao.JudgeUserPassword(userName, password)
+
 	if err != nil {
-		return &Gets{
-			Response: model.Response(struct {
-				StatusCode int32
-				StatusMsg  string
-			}{StatusCode: 0, StatusMsg: "登录失败，无法找到用户信息"}),
-			Token:  nil,
-			UserID: nil,
-		}, err
+		return "", 0, err
 	}
-	newToken, err := jwt.NewToken(userInfo) //使用用户信息生成一个jwt验证
+
+	token, err := jwt.NewToken(userId)
+
 	if err != nil {
-		return &Gets{
-			Response: model.Response(struct {
-				StatusCode int32
-				StatusMsg  string
-			}{StatusCode: 1, StatusMsg: "登录失败，错误的jwt生成请求"}),
-			Token:  nil,
-			UserID: nil,
-		}, err
+		return "", 0, fmt.Errorf("生成token失败: %v", err)
 	}
-	return &Gets{
-		Response: model.Response(struct {
-			StatusCode int32
-			StatusMsg  string
-		}{StatusCode: 0, StatusMsg: "登录成功"}),
-		Token:  &newToken,
-		UserID: &userInfo.ID,
-	}, nil
+	return token, userId, nil
+}
+
+func check(name, password string) error {
+	if name == "" {
+		return errors.New("用户名不能为空")
+	}
+	if password == "" {
+		return errors.New("密码不能为空")
+	}
+	if len(name) > 32 {
+		return errors.New("用户名不能超过32位")
+	}
+	if len(password) > 32 {
+		return errors.New("密码不能超过32位")
+	}
+	if !dao.CheckIsExistByName(name) {
+		return errors.New("该用户不存在")
+	}
+
+	return nil
 }

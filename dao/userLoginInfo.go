@@ -1,19 +1,25 @@
+// package dao
 package dao
 
-import "tiktok/controller"
+import (
+	"errors"
+)
 
-type UserLoginInfo struct {
-	ID         int64  `gorm:"primaryKey;column:id" json:"id"`             // 用户登录ID
-	UserInfoID int64  `gorm:"column:user_info_id" json:"user_info_id"`    // 用户信息ID
-	Username   string `gorm:"primaryKey;column:username" json:"username"` // 用户名
-	Password   string `gorm:"column:password;notnull" json:"password"`    // 密码
+// import "tiktok/controller"
+
+type UserLogin struct {
+	ID         int64  `gorm:"primaryKey;column:id"` // 用户登录ID
+	UserInfoID int64  // 用户信息ID
+	Username   string `gorm:"primaryKey;column:username"` // 用户名
+	Password   string `gorm:"column:password;notnull"`    // 密码
 }
 
-func JudgeUserPassword(a controller.LoginMessge) (*UserLoginInfo, error) { //根据传入的用户名和密码查找数据
-	var info *UserLoginInfo
-	result := DB.Where("username=? AND Password=?", a.Username, a.Password).Find(&info)
-	if result.Error != nil {
-		return nil, result.Error
+func JudgeUserPassword(name, password string) (int64, error) { //根据传入的用户名和密码查找数据
+	userlogInfo := UserLogin{}
+	DB.Where("username=? and password=?", name, password).First(&userlogInfo)
+
+	if userlogInfo.ID == 0 {
+		return 0, errors.New("密码错误")
 	}
-	return info, nil
+	return userlogInfo.ID, nil
 }

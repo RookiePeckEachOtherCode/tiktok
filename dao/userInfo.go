@@ -3,19 +3,16 @@ package dao
 import "errors"
 
 type UserInfo struct {
-	ID              int64          `json:"id"`               // 用户id
-	Name            string         `json:"name"`             // 用户名称
-	FavoriteCount   int64          `json:"favorite_count"`   // 喜欢数
-	FollowCount     int64          `json:"follow_count"`     // 关注总数
-	FollowerCount   int64          `json:"follower_count"`   // 粉丝总数
-	IsFollow        bool           `json:"is_follow"`        // true-已关注，false-未关注
-	Signature       string         `json:"signature"`        // 个人简介
-	TotalFavorited  string         `json:"total_favorited"`  // 获赞数量
-	WorkCount       int64          `json:"work_count"`       // 作品数
-	Avatar          string         `json:"avatar"`           // 用户头像
-	BackgroundImage string         `json:"background_image"` // 用户个人页顶部大图
-	UserLoginInfo   *UserLoginInfo // 用户登录信息
-	Videos          []*Video       // 用户发布的视频
+	ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
+	Name          string      `json:"name" gorm:"name,omitempty"`                     //用户名称
+	FollowCount   int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
+	FollowerCount int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
+	IsFollow      bool        `json:"is_follow" gorm:"is_follow,omitempty"`           //true-已关注，false-未关注
+	UserLoginInfo *UserLogin  `json:"-"`                                              //用户与登录信息的一对一
+	Videos        []*Video    `json:"-"`                                              //用户与视频的一对多
+	Follows       []*UserInfo `json:"-" gorm:"many2many:user_relations;"`             //用户与关注用户之间的多对多
+	FavorVideos   []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`          //用户与喜欢视频之间的多对多
+	Comments      []*Comment  `json:"-"`                                              //用户与评论的一对
 }
 
 // GetUserInfoById 根据用户id获取用户信息
@@ -28,4 +25,12 @@ func GetUserInfoById(userId int64) (UserInfo, error) {
 		return UserInfo{}, errors.New("该用户不存在")
 	}
 	return userInfo, nil
+}
+func CheckIsExistByName(name string) bool {
+	var userInfo UserInfo
+	DB.Where("name=?", name).Select([]string{"id"}).First(&userInfo)
+	if userInfo.ID == 0 {
+		return false
+	}
+	return true
 }
