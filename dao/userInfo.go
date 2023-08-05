@@ -3,7 +3,7 @@ package dao
 import "errors"
 
 type UserInfo struct {
-  ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
+	ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
 	Name          string      `json:"name" gorm:"name,omitempty"`                     //用户名称
 	FollowCount   int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
 	FollowerCount int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
@@ -26,6 +26,7 @@ func GetUserInfoById(userId int64) (UserInfo, error) {
 	}
 	return userInfo, nil
 }
+
 // AddUserInfo 保存用户信息到数据库
 func AddUserInfo(user *UserInfo) error {
 	if user == nil {
@@ -33,12 +34,11 @@ func AddUserInfo(user *UserInfo) error {
 	}
 	return DB.Create(user).Error
 }
-//通过名字查询用户是否存在
+
+// 通过名字查询用户是否存在
 func CheckIsExistByName(name string) bool {
 	var userInfo UserInfo
 	DB.Where("name=?", name).Select([]string{"id"}).First(&userInfo)
-	if userInfo.ID == 0 {
-		return false
-	}
-	return true
+
+	return userInfo.ID != 0
 }

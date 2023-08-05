@@ -8,11 +8,6 @@ import (
 	"tiktok/middleware/jwt"
 )
 
-type LoginRespons struct {
-	userId int64
-	token  string
-}
-
 func Handlelogin(userName, password string) (string, int64, error) {
 	if err := check(userName, password); err != nil {
 		return "", 0, err

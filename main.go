@@ -1,31 +1,19 @@
 package main
 
 import (
-	"tiktok/controller"
 	"tiktok/dao"
-
-	"github.com/gin-gonic/gin"
+	"tiktok/router"
 )
 
 func main() {
-	Init()
+	dao.InitDb()
+	InitGin()
+
 }
 
 // 初始化数据库和路由
-func Init() {
-	//初始化数据库
-	dao.InitDb()
+func InitGin() {
+	r := router.Init()
 
-	r := gin.Default()
-
-	apiGroup := r.Group("/douyin")
-
-	// 注册 feed 路由
-	apiGroup.GET("/feed", controller.Feed)
-
-	apiGroup.POST("/user/login/", controller.Login)
-
-	apiGroup.POST("/user/register/", controller.UserRegister)
-
-	r.Run()
+	r.Run(":8080")
 }

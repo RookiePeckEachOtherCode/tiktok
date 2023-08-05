@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"tiktok/controller"
@@ -7,7 +7,8 @@ import (
 )
 
 // 初始化路由
-func InitRouter() *gin.Engine {
+
+func Init() *gin.Engine {
 	r := gin.Default()
 
 	apiGroup := r.Group("/douyin")
@@ -15,7 +16,9 @@ func InitRouter() *gin.Engine {
 	//注册 feed 路由
 	apiGroup.GET("/feed", controller.Feed)
 	//注册 login 路由
-	apiGroup.POST("/user/login/", controller.Login)
+	apiGroup.POST("/user/login/", controller.UserLogin)
+	//注册 register 路由
+	apiGroup.POST("/user/register/", controller.UserRegister)
 
 	return r
 }

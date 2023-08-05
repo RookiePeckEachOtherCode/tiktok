@@ -14,7 +14,7 @@ type Gets struct {
 	UserID   *int64  `json:"user_id"` // 用户id
 }
 
-func Login(c *gin.Context) { //处理登录请求
+func UserLogin(c *gin.Context) { //处理登录请求
 	userName := c.Query("username")
 	password := c.Query("password")
 
