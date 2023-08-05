@@ -11,7 +11,7 @@
 - 基础接口
   - :white_check_mark: 视频流接口[feed/]
   - :construction: 用户注册[user/register/]
-  - :warning: 用户登录[user/login/]
+  - :construction: 用户登录[user/login/]
   -  :construction: 用户信息[user/]
   - :warning: 投稿接口[publish/action/]
   - :warning: 发布列表[publish/list/]

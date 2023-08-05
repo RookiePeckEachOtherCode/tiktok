@@ -3,7 +3,7 @@ package dao
 import "errors"
 
 type UserInfo struct {
-	ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
+  ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
 	Name          string      `json:"name" gorm:"name,omitempty"`                     //用户名称
 	FollowCount   int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
 	FollowerCount int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
