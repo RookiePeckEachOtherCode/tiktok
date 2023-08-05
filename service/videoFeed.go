@@ -6,13 +6,6 @@ import (
 	"time"
 )
 
-// Respons 包含状态码、状态描述和视频流信息
-type Respons struct {
-	StatusCode int64   `json:"status_code"` // 状态码，0-成功，其他值-失败
-	StatusMsg  *string `json:"status_msg"`  // 返回状态描述
-	FeedVideoFlow
-}
-
 // FeedVideoFlow 包含下次请求的最早发布时间和视频列表
 type FeedVideoFlow struct {
 	NextTime  int64        `json:"next_time"`  //发布最早的时间，作为下次请求时的latest_time

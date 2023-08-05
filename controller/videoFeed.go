@@ -3,21 +3,16 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"tiktok/model"
 	"tiktok/service"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Response 结构体定义了响应的状态码和状态信息
-type Response struct {
-	StatusCode int32  `json:"status_code"`          // 状态码
-	StatusMsg  string `json:"status_msg,omitempty"` // 状态信息
-}
-
 // FeedResponse 结构体定义了响应的状态码、状态信息和 FeedVideoFlow
 type FeedResponse struct {
-	Response
+	model.Response
 	FeedFlow service.FeedVideoFlow // 视频流
 }
 
@@ -32,7 +27,7 @@ func Feed(c *gin.Context) {
 	if err != nil { // 如果出现错误
 		// 返回错误响应
 		c.JSON(http.StatusOK, FeedResponse{
-			Response: Response{
+			Response: model.Response{
 				StatusCode: 1,
 				StatusMsg:  "获取失败",
 			},
@@ -42,7 +37,7 @@ func Feed(c *gin.Context) {
 
 	// 返回成功响应和视频流
 	c.JSON(http.StatusOK, FeedResponse{
-		Response: Response{
+		Response: model.Response{
 			StatusCode: 0,
 			StatusMsg:  "获取成功",
 		},
