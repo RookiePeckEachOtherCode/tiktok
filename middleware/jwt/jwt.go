@@ -12,7 +12,7 @@ type Claims struct {
 }
 
 func NewToken(userId int64) (string, error) {
-	// 设置过期时间为当前时间+7天
+  // 设置过期时间为当前时间7天
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 
 	claims := &Claims{
