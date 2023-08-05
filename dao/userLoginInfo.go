@@ -1,4 +1,10 @@
+// package dao
 package dao
+
+
+import (
+	"errors"
+)
 
 type UserLogin struct {
 	ID         int64  `gorm:"primaryKey;column:id"`       // 用户登录ID
@@ -7,6 +13,17 @@ type UserLogin struct {
 	Password   string `gorm:"column:password;notnull"`    // 密码
 }
 
+//根据传入的用户名和密码查找数据
+func JudgeUserPassword(name, password string) (int64, error) { 
+	userlogInfo := UserLogin{}
+	DB.Where("username=? and password=?", name, password).First(&userlogInfo)
+
+	if userlogInfo.ID == 0 {
+		return 0, errors.New("密码错误")
+	}
+	return userlogInfo.ID, nil
+
+ //根据用户名字查询用户信息
 func GetUserLoginInfoByName(name string) (UserLogin, error) {
 	userLoginInfo := UserLogin{}
 	DB.Where("username=?", name).First(&userLoginInfo)

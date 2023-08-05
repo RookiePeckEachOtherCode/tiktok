@@ -26,11 +26,19 @@ func GetUserInfoById(userId int64) (UserInfo, error) {
 	}
 	return userInfo, nil
 }
-
 // AddUserInfo 保存用户信息到数据库
 func AddUserInfo(user *UserInfo) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}
 	return DB.Create(user).Error
+}
+//通过名字查询用户是否存在
+func CheckIsExistByName(name string) bool {
+	var userInfo UserInfo
+	DB.Where("name=?", name).Select([]string{"id"}).First(&userInfo)
+	if userInfo.ID == 0 {
+		return false
+	}
+	return true
 }
