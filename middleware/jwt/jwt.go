@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"tiktok/dao"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,12 +11,12 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func NewToken(user dao.UserInfo) (string, error) {
-	// 设置过期时间为当前时间+3天
+func NewToken(userId int64) (string, error) {
+	// 设置过期时间为当前时间+7天
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 
 	claims := &Claims{
-		UserId: user.ID,
+		UserId: userId,
 		StandardClaims: jwt.StandardClaims{
 			// 过期时间
 			ExpiresAt: expirationTime.Unix(),
