@@ -22,6 +22,7 @@ func Init() {
 
 	// 注册 feed 路由
 	apiGroup.GET("/feed", controller.Feed)
+	apiGroup.POST("/user/register/", controller.UserRegister)
 
 	r.Run()
 }
