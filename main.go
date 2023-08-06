@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/router"
 )
@@ -15,5 +17,5 @@ func main() {
 func InitGin() {
 	r := router.Init()
 
-	r.Run(":8080")
+	r.Run(fmt.Sprintf(":%d", configs.GIN_PORT))
 }

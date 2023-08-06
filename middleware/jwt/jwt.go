@@ -34,7 +34,7 @@ func NewToken(userId int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(configs.JWT_KEY)
+	return token.SignedString([]byte(configs.JWT_KEY))
 }
 
 // 解析token,返回userId

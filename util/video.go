@@ -2,9 +2,14 @@ package util
 
 import (
 	"errors"
+	"fmt"
+	"path/filepath"
+	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // UpdateVideoInfo 更新视频信息
@@ -42,4 +47,12 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 	}
 
 	return &latestTime, nil
+}
+
+func NewFileName(fileName string) string {
+	return uuid.NewV4().String() + filepath.Ext(fileName)
+}
+
+func GetFileUrl(name, ty string) string {
+	return fmt.Sprintf("http://%v:%v/%v/%v", configs.GIN_IP, configs.GIN_PORT, ty, name)
 }
