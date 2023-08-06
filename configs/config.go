@@ -38,3 +38,6 @@ const MAX_NAME_LEN = 32
 
 // 密码，最长32个字符
 const MAX_PASSWORD_LEN = 32
+
+// Jwt密钥
+const JWT_KEY = "RookiePeckEachOtherCode"
