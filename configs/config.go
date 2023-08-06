@@ -2,6 +2,10 @@ package configs
 
 import "fmt"
 
+// gin的ip和端口
+const GIN_IP = "127.0.0.1"
+const GIN_PORT = 8080
+
 // SIGN_KEY 是用于签名的密钥
 const SIGN_KEY = "RookiePeckEachOtherCode"
 
@@ -41,3 +45,9 @@ const MAX_PASSWORD_LEN = 32
 
 // Jwt密钥
 const JWT_KEY = "RookiePeckEachOtherCode"
+
+// VideoSavePath 视频保存路径
+const VIDEO_SAVE_PATH = "/static/assets/video/"
+
+// VideoCoverSavePath 视频封面保存路径
+const VIDEO_COVER_SAVE_PATH = "/static/assets/video_cover/"

@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"errors"
 	"tiktok/configs"
 	"time"
 )
@@ -28,4 +29,11 @@ func GetVideoListByLastTime(lastTime time.Time) ([]*Video, error) {
 	err := DB.Model(&Video{}).Where("created_at<?", lastTime).Order("created_at ASC").Limit(configs.MAX_VIDEO_CNT).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).Find(&videos).Error
 
 	return videos, err
+}
+
+func NewVideo(v *Video) error {
+	if v == nil {
+		return errors.New("[NewVideo] video为空")
+	}
+	return DB.Create(v).Error
 }
