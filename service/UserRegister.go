@@ -12,7 +12,7 @@ import (
 func Register(name, password string) (string, int64, error) {
 	// 校验用户名和密码
 	if err := Check(name, password); err != nil {
-		return "", 0, err
+		return "", 0, fmt.Errorf("密码校验失败:%v", err)
 	}
 
 	// 保存用户登录信息
@@ -26,18 +26,18 @@ func Register(name, password string) (string, int64, error) {
 		Name:          name,
 	}
 
-	// 保存用户信息到数据库
-	err := dao.AddUserInfo(&userinfo)
-
-	if err != nil {
-		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
-	}
-
 	// 生成token
 	token, err := jwt.NewToken(userinfo.ID)
 
 	if err != nil {
 		return "", 0, fmt.Errorf("NewToken error:%v", err)
+	}
+
+	// 保存用户信息到数据库
+	err = dao.AddUserInfo(&userinfo)
+
+	if err != nil {
+		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
 	}
 
 	return token, userinfo.ID, nil
