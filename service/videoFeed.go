@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"tiktok/dao"
 	"tiktok/util"
 	"time"
@@ -12,60 +13,19 @@ type FeedVideoFlow struct {
 	VideoList []*dao.Video `json:"video_list"` //视频列表
 }
 
-// GetFeedVideoListFlow 包含最新时间、用户ID、视频列表、视频流信息和下次请求的最早发布时间
-type GetFeedVideoListFlow struct {
-	latestTime time.Time
-	userId     int64
-	videos     []*dao.Video
-	feedVideo  *FeedVideoFlow
-	nextTime   int64
-}
-
-// Feed 返回视频流信息
-func Feed(lastTime time.Time, userId int64) (*FeedVideoFlow, error) {
-	getFlow := GetFeedVideoListFlow{latestTime: lastTime, userId: userId}
-	return getFlow.Do()
-}
-
-// Do 处理视频流信息
-func (g *GetFeedVideoListFlow) Do() (*FeedVideoFlow, error) {
-	if err := g.Init(); err != nil {
-		return nil, err
-	}
-	if err := g.Pack(); err != nil {
-		return nil, err
-	}
-	return g.feedVideo, nil
-}
-
-// Init 初始化视频列表和下次请求的最早发布时间
-func (g *GetFeedVideoListFlow) Init() error {
-	//TODO 给视频添加点赞状态
-	//TODO 给登陆的用户 添加视频点赞的状态
-	var err error
-	g.videos, err = dao.GetVideoListByLastTime(g.latestTime)
-
+func Feed(userId int64, lastTime time.Time) ([]*dao.Video, int64, error) {
+	videos, err := dao.GetVideoListByLastTime(lastTime)
 	if err != nil {
-		return err
+		return nil, 0, fmt.Errorf("dao.GetVideoListByLastTime error: %v", err)
 	}
-
-	latestTime, _ := util.UpdateVideoInfo(g.userId, &g.videos)
-
-	if latestTime != nil {
-		g.nextTime = latestTime.UnixNano() / int64(time.Millisecond)
-		return nil
+	lastestTime, _ := util.UpdateVideoInfo(userId, &videos)
+	if lastestTime != nil {
+		//latestTime不为空表示还有更早的视频,使用其时间戳获取下一页
+		nextTime := (lastestTime.UnixNano() / int64(time.Millisecond))
+		return videos, nextTime, nil
 	}
+	//latestTime为空表示已取到最新视频,需要使用当前时间获取下一页
+	nextTime := (time.Now().UnixNano() / int64(time.Millisecond))
 
-	g.nextTime = time.Now().Unix() / int64(time.Millisecond)
-
-	return nil
-}
-
-// Pack 打包视频流信息
-func (g *GetFeedVideoListFlow) Pack() error {
-	g.feedVideo = &FeedVideoFlow{
-		NextTime:  g.nextTime,
-		VideoList: g.videos,
-	}
-	return nil
+	return videos, nextTime, nil
 }
