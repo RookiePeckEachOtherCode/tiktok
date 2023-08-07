@@ -16,15 +16,15 @@ type UserInfo struct {
 }
 
 // GetUserInfoById 根据用户id获取用户信息
-func GetUserInfoById(userId int64) (UserInfo, error) {
+func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
 
 	DB.Where("id=?", userId).Select([]string{"id", "name", "follow_count", "follower_count", "is_follow"}).First(&userInfo)
 
 	if userInfo.ID == 0 {
-		return UserInfo{}, errors.New("该用户不存在")
+		return nil, errors.New("该用户不存在")
 	}
-	return userInfo, nil
+	return &userInfo, nil
 }
 
 // AddUserInfo 保存用户信息到数据库
@@ -39,6 +39,12 @@ func AddUserInfo(user *UserInfo) error {
 func CheckIsExistByName(name string) bool {
 	var userInfo UserInfo
 	DB.Where("name=?", name).Select([]string{"id"}).First(&userInfo)
+
+	return userInfo.ID != 0
+}
+func CheckIsExistByID(id int64) bool {
+	var userInfo UserInfo
+	DB.Where("id=?", id).Select([]string{"id"}).First(&userInfo)
 
 	return userInfo.ID != 0
 }

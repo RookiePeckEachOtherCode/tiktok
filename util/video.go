@@ -39,7 +39,7 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		}
 		userInfo.IsFollow = p.GetUserRelation(userId, userInfo.ID)
 
-		(*videos)[i].Author = userInfo
+		(*videos)[i].Author = *userInfo
 
 		if userId > 0 {
 			(*videos)[i].IsFavorite = p.GetFavorateState(userId, (*videos)[i].ID)

@@ -37,3 +37,11 @@ func NewVideo(v *Video) error {
 	}
 	return DB.Create(v).Error
 }
+
+func GetVideoListByUserId(userId int64) (*[]Video, error) {
+	var videoList []Video
+
+	err := DB.Where("user_info_id=?", userId).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title"}).Find(&videoList).Error
+
+	return &videoList, err
+}
