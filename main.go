@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	configs.Bless()
 	dao.InitDb()
 	InitGin()
 

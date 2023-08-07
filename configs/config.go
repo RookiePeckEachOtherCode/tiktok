@@ -1,6 +1,8 @@
 package configs
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // gin的ip和端口
 const GIN_IP = "127.0.0.1"
@@ -51,3 +53,27 @@ const VIDEO_SAVE_PATH = "/static/assets/video/"
 
 // VideoCoverSavePath 视频封面保存路径
 const VIDEO_COVER_SAVE_PATH = "/static/assets/video_cover/"
+
+func Bless() {
+	fmt.Println("                    _ooOoo_")
+	fmt.Println("                   o8888888o")
+	fmt.Println("                   88\" . \"88")
+	fmt.Println("                   (| -_- |)")
+	fmt.Println("                    O\\ = /O")
+	fmt.Println("                ____/`---'\\____")
+	fmt.Println("              .   ' \\| |// `.")
+	fmt.Println("               / \\||| : |||// \\")
+	fmt.Println("             / _||||| -:- |||||- \\")
+	fmt.Println("               | | \\\\\\ - /// | |")
+	fmt.Println("             | \\_| ''\\---/'' | |")
+	fmt.Println("              \\ .-\\__ `-` ___/-. /")
+	fmt.Println("           ___`. .' /--.--\\ `. . __")
+	fmt.Println("        .\"\" '< `.___\\_<|>_/___.' >'\"\".")
+	fmt.Println("       | | : `- \\`.;`\\ _ /`;.`/ - ` : | |")
+	fmt.Println("         \\ \\ `-. \\_ __\\ /__ _/ .-` / /")
+	fmt.Println(" ======`-.____`-.___\\_____/___.-`____.-'======")
+	fmt.Println("                    `=---='")
+	fmt.Println("")
+	fmt.Println(".............................................")
+	fmt.Println("          佛祖保佑             永无BUG")
+}
