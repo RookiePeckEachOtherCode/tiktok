@@ -2,6 +2,7 @@ package router
 
 import (
 	"tiktok/controller"
+	"tiktok/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,10 @@ func Init() *gin.Engine {
 	apiGroup.POST("/user/login/", controller.UserLogin)
 	//注册 register 路由
 	apiGroup.POST("/user/register/", controller.UserRegister)
+	//注册 publish_list 路由
 	apiGroup.POST("/publish/action/", controller.PublishVideo)
+
+	apiGroup.GET("/publish/list/", jwt.Auth(), controller.PublishList)
 
 	return r
 }

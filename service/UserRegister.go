@@ -11,7 +11,7 @@ import (
 // Register 注册
 func Register(name, password string) (string, int64, error) {
 	// 校验用户名和密码
-	if err := Check(name, password); err != nil {
+	if err := RegisterCheck(name, password); err != nil {
 		return "", 0, fmt.Errorf("密码校验失败:%v", err)
 	}
 
@@ -44,7 +44,7 @@ func Register(name, password string) (string, int64, error) {
 }
 
 // Check 校验用户名和密码
-func Check(name, password string) error {
+func RegisterCheck(name, password string) error {
 	if len(name) == 0 {
 		return errors.New("用户名不能为空")
 	}
