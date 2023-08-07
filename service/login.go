@@ -9,7 +9,7 @@ import (
 )
 
 func Handlelogin(userName, password string) (string, int64, error) {
-	if err := check(userName, password); err != nil {
+	if err := check(userName); err != nil {
 		return "", 0, err
 	}
 
@@ -27,22 +27,9 @@ func Handlelogin(userName, password string) (string, int64, error) {
 	return token, userId, nil
 }
 
-func check(name, password string) error {
-	if name == "" {
-		return errors.New("用户名不能为空")
-	}
-	if password == "" {
-		return errors.New("密码不能为空")
-	}
-	if len(name) > 32 {
-		return errors.New("用户名不能超过32位")
-	}
-	if len(password) > 32 {
-		return errors.New("密码不能超过32位")
-	}
+func check(name string) error {
 	if !dao.CheckIsExistByName(name) {
 		return errors.New("该用户不存在")
 	}
-
 	return nil
 }
