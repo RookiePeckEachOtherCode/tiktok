@@ -19,7 +19,16 @@ type UserRegisterRespons struct {
 // UserRegister 用户注册
 func UserRegister(c *gin.Context) {
 	userName := c.Query("username")
-	password := c.Query("password")
+	_password, _ := c.Get("password")
+
+	password, ok := _password.(string)
+
+	if !ok {
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "密码解析失败",
+		})
+	}
 
 	token, Id, err := service.Register(userName, password)
 

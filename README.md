@@ -14,7 +14,7 @@
   - :white_check_mark:用户登录[user/login/]
   - :warning: 用户信息[user/]
   - :white_check_mark: 投稿接口[publish/action/]
-  - :warning: 发布列表[publish/list/]
+  - :construction:发布列表[publish/list/]
 - 扩展接口
   - 互动接口
     - :warning: 赞操作[favorite/action/]
