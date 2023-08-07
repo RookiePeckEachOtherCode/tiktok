@@ -31,17 +31,33 @@ func GetVideoListByLastTime(lastTime time.Time) ([]*Video, error) {
 	return videos, err
 }
 
-func NewVideo(v *Video) error {
+func NewVideo(v *Video) error { //上传视频
 	if v == nil {
 		return errors.New("[NewVideo] video为空")
 	}
 	return DB.Create(v).Error
 }
 
-func GetVideoListByUserId(userId int64) (*[]Video, error) {
+func GetVideoListByUserId(userId int64) (*[]Video, error) { //通过用户id查询用户视频列表
 	var videoList []Video
 
 	err := DB.Where("user_info_id=?", userId).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title"}).Find(&videoList).Error
 
 	return &videoList, err
+}
+func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
+	var vd Video
+
+	err := DB.Where("id=?", vid).Find(&vd).Error
+
+	return &vd, err
+}
+func FavoriteVedio(v *Video, act int64) error { //更新点赞数
+	if act == 1 {
+		v.FavoriteCount++
+	} else if act == 0 {
+		v.FavoriteCount--
+	}
+	err := DB.Save(v).Error
+	return err
 }
