@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"net/http"
 	"tiktok/configs"
 	"tiktok/model"
@@ -37,12 +38,13 @@ func NewToken(userId int64) (string, error) {
 	return token.SignedString([]byte(configs.JWT_KEY))
 }
 
-// 解析token,返回userId
+// 解析token,返回带有userId的Claims
 func ParseToken(tokenString string) (*Claims, bool) {
 	// 解析token
 	token, _ := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return configs.JWT_KEY, nil
+		return []byte(configs.JWT_KEY), nil //要用将密钥变成字节数组形式才行
 	})
+	fmt.Printf("%v\n", token)
 	// 判断token是否有效
 	if token != nil {
 		if claim, ok := token.Claims.(*Claims); ok && token.Valid {
@@ -66,9 +68,8 @@ func Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
+		fmt.Printf("%v\n", tokenStr)
 		token, ok := ParseToken(tokenStr)
-
 		// 如果token无效
 		if !ok {
 			c.JSON(http.StatusForbidden, model.Response{

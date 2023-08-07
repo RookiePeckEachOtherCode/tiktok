@@ -27,6 +27,7 @@ func Init() *gin.Engine {
 	apiGroup.POST("/publish/action/", jwt.Auth(), controller.PublishVideo)
 	//注册 get-publish-list路由
 	apiGroup.GET("/publish/list/", jwt.Auth(), controller.PublishList)
-
+	//注册 FavoriteAct路由
+	apiGroup.POST("/favorite/action/", jwt.Auth(), controller.RecFavorite)
 	return r
 }
