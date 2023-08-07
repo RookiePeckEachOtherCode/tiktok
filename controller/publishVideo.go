@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -49,6 +50,7 @@ func PublishVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "视频文件保存失败",
 		})
+		fmt.Printf("%v\n", err)
 		return
 	}
 	if err := videoinfo.SaveCover(c); err != nil {
@@ -56,6 +58,7 @@ func PublishVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "视频封面保存失败",
 		})
+		fmt.Printf("%v\n", err)
 		return
 	}
 
@@ -66,7 +69,7 @@ func PublishVideo(c *gin.Context) {
 func GetVideoInfo(file *multipart.FileHeader) *Videoinfo {
 	videoinfo := Videoinfo{}
 	videoinfo.VideoName = util.NewFileName(file.Filename)
-	videoinfo.CoverName = util.NewFileName(file.Filename)
+	videoinfo.CoverName = util.NewFileName(file.Filename) + ".jpg"
 	videoinfo.VideoSavePath = filepath.Join(configs.VIDEO_SAVE_PATH, videoinfo.VideoName)
 	videoinfo.CoverSavePath = filepath.Join(configs.VIDEO_COVER_SAVE_PATH, videoinfo.CoverName)
 	videoinfo.file = file
@@ -78,7 +81,6 @@ func (v *Videoinfo) SaveVideo(c *gin.Context) error {
 
 	// 保存到临时目录
 	tmpPath := filepath.Join(os.TempDir(), v.VideoName)
-
 	if err := c.SaveUploadedFile(v.file, tmpPath); err != nil {
 		return err
 	}
@@ -97,20 +99,21 @@ func (v *Videoinfo) SaveCover(c *gin.Context) error {
 
 	// 创建临时目录
 	tmpCoverPath := filepath.Join(os.TempDir(), v.CoverName)
-
 	cmd := exec.Command("ffmpeg", "-i", v.VideoSavePath,
-		"-ss", "00:00:01", "-vframes", "1", tmpCoverPath)
+		"-vf", fmt.Sprintf("select='eq(n,%d)'", 1), "-vframes", "1", "-f", "image2", tmpCoverPath)
+	// 将标准错误输出重定向到 os.Stderr
+	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
 		os.Remove(tmpCoverPath) // 移除临时文件
-		return err
+		return fmt.Errorf("ffmpeg execution failed: %s", err)
 	}
 
 	// 移动到正式目录
 	err = os.Rename(tmpCoverPath, v.CoverSavePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to move cover image: %s", err)
 	}
 
 	return nil
