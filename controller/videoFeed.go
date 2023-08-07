@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"tiktok/dao"
+	"tiktok/middleware/jwt"
 	"tiktok/model"
 	"tiktok/service"
 	"time"
@@ -13,52 +16,77 @@ import (
 // FeedResponse 结构体定义了响应的状态码、状态信息和 FeedVideoFlow
 type FeedResponse struct {
 	model.Response
-	FeedFlow service.FeedVideoFlow // 视频流
+	NextTime  int64        `json:"next_time"`  //发布最早的时间，作为下次请求时的latest_time
+	VideoList []*dao.Video `json:"video_list"` //视频列表
 }
 
-// Feed 函数处理获取视频流的请求
 func Feed(c *gin.Context) {
-	inputTime := ParseInputTime(c) // 解析请求中的时间参数
-	userId := GetUserId(c)         // 获取请求中的用户 ID
+	token, ok := c.GetQuery("token")
+	var userId int64 = 0
 
-	// 调用 service 层的 Feed 函数获取视频流
-	vidoFlow, err := service.Feed(inputTime, userId)
+	if ok { //已经登陆
+		var err error
+		userId, err = AlreadlyLogin(token)
+		if err != nil {
+			c.JSON(200, FeedResponse{
+				Response: model.Response{
+					StatusCode: 400,
+					StatusMsg:  err.Error(),
+				},
+			})
+			return
+		}
+	}
 
-	if err != nil { // 如果出现错误
-		// 返回错误响应
-		c.JSON(http.StatusOK, FeedResponse{
+	latestTime, err := ParseLatestTime(c)
+	if err != nil {
+		c.JSON(200, FeedResponse{
 			Response: model.Response{
 				StatusCode: 1,
-				StatusMsg:  "获取失败",
+				StatusMsg:  err.Error(),
 			},
 		})
 		return
 	}
 
-	// 返回成功响应和视频流
+	videos, nextTime, err := service.Feed(userId, latestTime)
+
+	if err != nil {
+		c.JSON(http.StatusOK, FeedResponse{
+			Response: model.Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
+			},
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, FeedResponse{
 		Response: model.Response{
 			StatusCode: 0,
-			StatusMsg:  "获取成功",
+			StatusMsg:  "success",
 		},
-		FeedFlow: *vidoFlow,
+		NextTime:  nextTime,
+		VideoList: videos,
 	})
 }
 
-// ParseInputTime 函数解析请求中的时间参数
-func ParseInputTime(c *gin.Context) time.Time {
-	inputTime := c.Query("latest_time") // 获取请求中的时间参数 latest_time
-
-	if len(inputTime) != 0 { // 如果请求中有时间参数
-		tempTime, _ := strconv.ParseInt(inputTime, 10, 64) // 将时间参数转换为 int64 类型
-
-		return time.Unix(tempTime, 0) // 返回 Unix 时间
+func AlreadlyLogin(token string) (int64, error) {
+	claims, ok := jwt.ParseToken(token)
+	if ok {
+		if claims.ExpiresAt > time.Now().Unix() {
+			return 0, errors.New("登陆过期,请重新登陆")
+		}
+		return claims.UserId, nil
 	}
-	return time.Now() // 如果请求中没有时间参数，则返回当前时间
+	return 0, errors.New("token解析失败")
 }
 
-// GetUserId 函数获取请求中的用户 ID
-func GetUserId(c *gin.Context) int64 {
-	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64) // 获取请求中的用户 ID
-	return userId                                                // 返回用户 ID
+func ParseLatestTime(c *gin.Context) (time.Time, error) {
+	latestTime, err := strconv.ParseInt(c.Query("latest_time"), 10, 64)
+
+	if err != nil {
+		return time.Time{}, errors.New("latest_time解析失败")
+	}
+	return time.Unix(0, latestTime*int64(time.Millisecond)), nil
 }
