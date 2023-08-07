@@ -16,7 +16,15 @@ type Gets struct {
 
 func UserLogin(c *gin.Context) { //处理登录请求
 	userName := c.Query("username")
-	password := c.Query("password")
+	_password, _ := c.Get("password")
+	password, ok := _password.(string)
+	if !ok {
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "密码解析失败",
+		})
+		return
+	}
 
 	token, userID, err := service.Handlelogin(userName, password)
 
