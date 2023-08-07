@@ -2,40 +2,46 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 )
 
+// GetPublishList 获取发布列表
 func GetPublishList(userId int64) (*[]dao.Video, error) {
-	var videos []dao.Video
-	var userInfo dao.UserInfo
-
-	if err := Check(userId, &videos, &userInfo); err != nil {
-		return nil, fmt.Errorf("Check: %v", err)
+	userInfo, videos, err := PublishListCheck(userId)
+	if err != nil {
+		return nil, err
 	}
 
-	for i := range videos {
-		videos[i].Author = userInfo
-		videos[i].IsFavorite = redis.NewProxyIndexMap().GetFavorateState(userId, videos[i].ID)
+	// 为视频列表添加作者信息
+	for i := range *videos {
+		(*videos)[i].Author = *userInfo
+		(*videos)[i].IsFavorite = redis.NewProxyIndexMap().GetFavorateState(userId, (*videos)[i].ID)
 	}
 
-	return &videos, nil
+	return videos, nil
 }
 
-func Check(userId int64, videos *[]dao.Video, userInfo *dao.UserInfo) error {
+// PublishListCheck 发布列表检查
+func PublishListCheck(userId int64) (*dao.UserInfo, *[]dao.Video, error) {
 	if err := CheckIsExistByID(userId); err != nil {
-		return err
+		return nil, nil, err
 	}
-	if err := GetVideoListByUserId(userId, videos); err != nil {
-		return err
+
+	userInfo, err := GetUserInfoByUserId(userId)
+	if err != nil {
+		return nil, nil, err
 	}
-	if err := GetUserInfoByUserId(userId, userInfo); err != nil {
-		return err
+
+	videos, err := GetVideoListByUserId(userId)
+	if err != nil {
+		return nil, nil, err
 	}
-	return nil
+
+	return userInfo, videos, nil
 }
 
+// CheckIsExistByID 根据用户id检查用户是否存在
 func CheckIsExistByID(userId int64) error {
 	if !dao.CheckIsExistByID(userId) {
 		return errors.New("该用户不存在")
@@ -43,13 +49,20 @@ func CheckIsExistByID(userId int64) error {
 	return nil
 }
 
-func GetVideoListByUserId(userId int64, videos *[]dao.Video) error {
-	var err error
-	videos, err = dao.GetVideoListByUserId(userId)
-	return err
+// GetVideoListByUserId 根据用户id获取视频列表
+func GetVideoListByUserId(userId int64) (*[]dao.Video, error) {
+	videos, err := dao.GetVideoListByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	return videos, nil
 }
-func GetUserInfoByUserId(userId int64, userInfo *dao.UserInfo) error {
-	var err error
-	userInfo, err = dao.GetUserInfoById(userId)
-	return err
+
+// GetUserInfoByUserId 根据用户id获取用户信息
+func GetUserInfoByUserId(userId int64) (*dao.UserInfo, error) {
+	userInfo, err := dao.GetUserInfoById(userId)
+	if err != nil {
+		return nil, err
+	}
+	return userInfo, nil
 }

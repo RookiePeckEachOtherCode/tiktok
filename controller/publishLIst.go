@@ -17,7 +17,7 @@ type PublishListResponse struct {
 func PublishList(c *gin.Context) {
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
-
+	//判断用户id类型是否正确
 	if !ok {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
@@ -25,6 +25,7 @@ func PublishList(c *gin.Context) {
 		})
 
 	}
+	//获取发布列表
 	videoList, err := service.GetPublishList(userId)
 
 	if err != nil {

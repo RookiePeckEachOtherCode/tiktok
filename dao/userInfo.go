@@ -42,6 +42,8 @@ func CheckIsExistByName(name string) bool {
 
 	return userInfo.ID != 0
 }
+
+// 通过id查询用户是否存在
 func CheckIsExistByID(id int64) bool {
 	var userInfo UserInfo
 	DB.Where("id=?", id).Select([]string{"id"}).First(&userInfo)

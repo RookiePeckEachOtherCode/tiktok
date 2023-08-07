@@ -2,8 +2,8 @@ package router
 
 import (
 	"tiktok/controller"
-	"tiktok/middleware/jwt"
 	"tiktok/middleware/hash"
+	"tiktok/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +23,9 @@ func Init() *gin.Engine {
 	apiGroup.POST("/user/login/", hash.CheckUserName(), hash.CheckAndHashPassword(), controller.UserLogin)
 	//注册 register 路由
 	apiGroup.POST("/user/register/", hash.CheckUserName(), hash.CheckAndHashPassword(), controller.UserRegister)
-  //注册 publish-action路由
-	apiGroup.POST("/publish/action/",jwt.Auth(), controller.PublishVideo)
-  //注册 get-publish-list路由
+	//注册 publish-action路由
+	apiGroup.POST("/publish/action/", jwt.Auth(), controller.PublishVideo)
+	//注册 get-publish-list路由
 	apiGroup.GET("/publish/list/", jwt.Auth(), controller.PublishList)
 
 	return r

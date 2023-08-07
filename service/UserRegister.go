@@ -9,8 +9,8 @@ import (
 
 // Register 注册
 func Register(name, password string) (string, int64, error) {
-  
-	if err := Check(name); err != nil {
+
+	if err := RegisterCheck(name); err != nil {
 		return "", 0, err
 	}
 	// 保存用户登录信息
@@ -43,8 +43,8 @@ func Register(name, password string) (string, int64, error) {
 
 // Check 校验用户名和密码
 
-func Check(name string) error {
-  
+func RegisterCheck(name string) error {
+
 	if dao.IsExistUserLoginInfoByName(name) {
 		return errors.New("该用户名已被注册")
 	}
