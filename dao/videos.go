@@ -57,43 +57,36 @@ func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作�
 	if err != nil {
 		return errors.Wrap(err, "获取用户信息失败")
 	}
-	var deleteuser *UserInfo
-	var deletvideo *Video
-
 	if act == 1 {
 		v.FavoriteCount++                   //喜欢数++
 		v.Users = append(v.Users, userInfo) //添加喜欢用户信息
 		userInfo.FavorVideos = append(userInfo.FavorVideos, v)
-	} else if act == 0 {
+	} else if act == 2 {
 		v.FavoriteCount--
-		for i, user := range v.Users { //遍历寻找执行操作的用户
-			if user.ID == userInfo.ID {
-				deleteuser = user
-				v.Users = append(v.Users[:i], v.Users[i+1:]...) //将该用户从视频的喜欢列表中移除
+		var duser UserInfo
+		result := DB.First(&duser, uid) //查找对应的用户对象
+		if result.Error != nil {
+			return errors.New("无法查询到用户")
+		}
+		for i, u := range v.Users {
+			if u.ID == duser.ID {
+				v.Users = append(v.Users[:i], v.Users[i+1:]...) //从当前视频移除对应用户
 				break
 			}
 		}
-		if deleteuser == nil {
-			return errors.New("找不到要取消点赞的用户")
-		}
-		for i, vdi := range userInfo.FavorVideos { //用户的喜欢列表层面操作，原理同上
-			if vdi.ID == v.ID {
-				deletvideo = vdi
-				userInfo.FavorVideos = append(userInfo.FavorVideos[:i], userInfo.FavorVideos[i+1:]...)
+		for i, vid := range duser.FavorVideos {
+			if v.ID == vid.ID {
+				duser.FavorVideos = append(duser.FavorVideos[:i], duser.FavorVideos[i+1:]...) //从对象用户中移除视频
 				break
 			}
 		}
-		if deletvideo == nil {
-			return errors.New("找不到要移除喜欢的视频")
+		if err := DB.Save(duser).Error; err != nil {
+			return errors.Wrap(err, "保存用户信息失败")
 		}
 	}
-
 	if err := DB.Save(v).Error; err != nil {
 		return errors.Wrap(err, "保存视频信息失败")
 	}
-	if err := DB.Save(userInfo).Error; err != nil {
-		return errors.Wrap(err, "保存用户信息失败")
-	}
-
+	DB.Model(v).Association("Users").Replace(v.Users) //刷新数据库，使移除喜欢的视频不会回滚到喜欢列表中
 	return nil
 }
