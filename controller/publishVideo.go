@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"tiktok/configs"
 	"tiktok/model"
 	"tiktok/service"
@@ -25,21 +26,23 @@ type Videoinfo struct {
 
 func PublishVideo(c *gin.Context) {
 	titile := c.PostForm("title")
-	_userId, _ := c.Get("user_id")
-	userId, ok := _userId.(int64)
+	_userId := c.Query("user_id")
+	/*userId, ok := _userId.(int64)
 	if !ok {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "用户id 类型错误",
 		})
 		return
-	}
+	}*/
+	userId, _ := strconv.ParseInt(_userId, 10, 64)
 	data, err := c.FormFile("data")
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "视频文件错误",
 		})
+		fmt.Printf("%v\n", err)
 		return
 	}
 

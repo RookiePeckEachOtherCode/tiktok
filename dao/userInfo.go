@@ -50,3 +50,14 @@ func CheckIsExistByID(id int64) bool {
 
 	return userInfo.ID != 0
 }
+
+// 通过id获取用户喜欢的视频列表
+func GetFavList(id int64) ([]*Video, error) {
+	var uinfo UserInfo
+	err := DB.Where("id=?", id).Select([]string{"id"}).First(&uinfo).Error
+	if err != nil {
+		return nil, err
+	} else {
+		return uinfo.FavorVideos, nil
+	}
+}

@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"tiktok/configs"
 	"time"
 )
@@ -52,12 +52,48 @@ func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
 
 	return &vd, err
 }
-func FavoriteVedio(v *Video, act int64) error { //更新点赞数
+func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作，包含对用户喜欢列表
+	userInfo, err := GetUserInfoById(uid)
+	if err != nil {
+		return errors.Wrap(err, "获取用户信息失败")
+	}
+	var deleteuser *UserInfo
+	var deletvideo *Video
+
 	if act == 1 {
-		v.FavoriteCount++
+		v.FavoriteCount++                   //喜欢数++
+		v.Users = append(v.Users, userInfo) //添加喜欢用户信息
+		userInfo.FavorVideos = append(userInfo.FavorVideos, v)
 	} else if act == 0 {
 		v.FavoriteCount--
+		for i, user := range v.Users { //遍历寻找执行操作的用户
+			if user.ID == userInfo.ID {
+				deleteuser = user
+				v.Users = append(v.Users[:i], v.Users[i+1:]...) //将该用户从视频的喜欢列表中移除
+				break
+			}
+		}
+		if deleteuser == nil {
+			return errors.New("找不到要取消点赞的用户")
+		}
+		for i, vdi := range userInfo.FavorVideos { //用户的喜欢列表层面操作，原理同上
+			if vdi.ID == v.ID {
+				deletvideo = vdi
+				userInfo.FavorVideos = append(userInfo.FavorVideos[:i], userInfo.FavorVideos[i+1:]...)
+				break
+			}
+		}
+		if deletvideo == nil {
+			return errors.New("找不到要移除喜欢的视频")
+		}
 	}
-	err := DB.Save(v).Error
-	return err
+
+	if err := DB.Save(v).Error; err != nil {
+		return errors.Wrap(err, "保存视频信息失败")
+	}
+	if err := DB.Save(userInfo).Error; err != nil {
+		return errors.Wrap(err, "保存用户信息失败")
+	}
+
+	return nil
 }

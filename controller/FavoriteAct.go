@@ -10,6 +10,14 @@ import (
 )
 
 func RecFavorite(c *gin.Context) {
+	uid := c.Query("user_id")
+	id, err2 := strconv.ParseInt(uid, 10, 64)
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "获取用户id失败",
+		})
+	}
 	vid := c.Query("video_id")                //获取视频id
 	Vid, err := strconv.ParseInt(vid, 10, 64) //格式转换以查询
 	if err != nil {
@@ -26,7 +34,7 @@ func RecFavorite(c *gin.Context) {
 			StatusMsg:  "点赞失败",
 		})
 	}
-	err = service.HandleFav(Vid, Act)
+	err = service.HandleFav(Vid, Act, id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{
 			StatusCode: 1,
