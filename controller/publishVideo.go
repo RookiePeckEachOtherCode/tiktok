@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"tiktok/configs"
 	"tiktok/model"
 	"tiktok/service"
 	"tiktok/util"
+
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,20 +46,22 @@ func PublishVideo(c *gin.Context) {
 
 	videoinfo := GetVideoInfo(data)
 
+	util.PrintLog(fmt.Sprintln("videoinfo: ", videoinfo))
+
 	if err := videoinfo.SaveVideo(c); err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频文件保存失败",
+			StatusMsg:  fmt.Sprintf("视频保存失败: %s", err.Error()),
 		})
-		fmt.Printf("%v\n", err)
+		log.Printf("%v\n", err)
 		return
 	}
-	if err := videoinfo.SaveCover(c); err != nil {
+	if err := videoinfo.SaveCover(); err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频封面保存失败",
+			StatusMsg:  fmt.Sprintf("封面保存失败: %s", err.Error()),
 		})
-		fmt.Printf("%v\n", err)
+		log.Printf("%v\n", err)
 		return
 	}
 
@@ -69,52 +72,27 @@ func PublishVideo(c *gin.Context) {
 func GetVideoInfo(file *multipart.FileHeader) *Videoinfo {
 	videoinfo := Videoinfo{}
 	videoinfo.VideoName = util.NewFileName(file.Filename)
-	videoinfo.CoverName = util.NewFileName(file.Filename) + ".jpg"
+	videoinfo.CoverName = string([]byte(videoinfo.VideoName)[:len(videoinfo.VideoName)-len(filepath.Ext(videoinfo.VideoName))]) + ".jpg"
 	videoinfo.VideoSavePath = filepath.Join(configs.VIDEO_SAVE_PATH, videoinfo.VideoName)
 	videoinfo.CoverSavePath = filepath.Join(configs.VIDEO_COVER_SAVE_PATH, videoinfo.CoverName)
 	videoinfo.file = file
 	return &videoinfo
 }
 
-// SaveVideo
-func (v *Videoinfo) SaveVideo(c *gin.Context) error {
-
-	// 保存到临时目录
-	tmpPath := filepath.Join(os.TempDir(), v.VideoName)
-	if err := c.SaveUploadedFile(v.file, tmpPath); err != nil {
-		return err
-	}
-
-	// 移动到正式目录
-	err := os.Rename(tmpPath, v.VideoSavePath)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (v Videoinfo) SaveVideo(c *gin.Context) error {
+	return c.SaveUploadedFile(v.file, v.VideoSavePath)
 }
 
-// SaveCover
-func (v *Videoinfo) SaveCover(c *gin.Context) error {
+func (v Videoinfo) SaveCover() error {
+	videoPath := v.VideoSavePath
+	coverPath := v.CoverSavePath
 
-	// 创建临时目录
-	tmpCoverPath := filepath.Join(os.TempDir(), v.CoverName)
-	cmd := exec.Command("ffmpeg", "-i", v.VideoSavePath,
-		"-vf", fmt.Sprintf("select='eq(n,%d)'", 1), "-vframes", "1", "-f", "image2", tmpCoverPath)
-	// 将标准错误输出重定向到 os.Stderr
-	cmd.Stderr = os.Stderr
+	cmd := exec.Command("ffmpeg", "-i", videoPath, "-vframes", "1", "-q:v", "2", coverPath)
 
+	// 执行命令
 	err := cmd.Run()
 	if err != nil {
-		os.Remove(tmpCoverPath) // 移除临时文件
-		return fmt.Errorf("ffmpeg execution failed: %s", err)
+		panic(err)
 	}
-
-	// 移动到正式目录
-	err = os.Rename(tmpCoverPath, v.CoverSavePath)
-	if err != nil {
-		return fmt.Errorf("failed to move cover image: %s", err)
-	}
-
 	return nil
 }
