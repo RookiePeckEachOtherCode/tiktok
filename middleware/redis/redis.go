@@ -12,7 +12,7 @@ var ctx = context.Background()
 var rdb *redis.Client
 
 // redisInit函数用于初始化redis客户端
-func redisInit() {
+func Init() {
 	rdb = redis.NewClient(
 		&redis.Options{
 			Addr:     configs.GetDBInfo(),
