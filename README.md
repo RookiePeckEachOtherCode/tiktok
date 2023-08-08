@@ -17,8 +17,8 @@
   - :white_check_mark:发布列表[publish/list/]
 - 扩展接口
   - 互动接口
-    - :construction: 赞操作[favorite/action/]
-    - :warning: 喜欢列表[favorite/list/]
+    - :white_check_mark: 赞操作[favorite/action/]
+    - :construction: 喜欢列表[favorite/list/]
     - :warning: 评论操作[comment/action/]
     - :warning: 评论列表[comment/list/]
   - 社交接口
