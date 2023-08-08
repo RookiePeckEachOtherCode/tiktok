@@ -54,5 +54,5 @@ func NewFileName(fileName string) string {
 }
 
 func GetFileUrl(name, ty string) string {
-	return fmt.Sprintf("http://%v:%v/%v/%v", configs.GIN_IP, configs.GIN_PORT, ty, name)
+	return fmt.Sprintf("http://%v:%v/%v/%v", configs.LAN_IP, configs.GIN_PORT, ty, name)
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"tiktok/configs"
 	"tiktok/model"
+	"tiktok/util"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -56,10 +57,14 @@ func ParseToken(tokenString string) (*Claims, bool) {
 // 鉴权
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenStr := c.Query("token")
-
 		// 如果token为空
+		tokenStr := c.Query("token")
 		if len(tokenStr) == 0 {
+			tokenStr = c.PostForm("token")
+		}
+		if len(tokenStr) == 0 {
+			util.PrintLog("token为空")
+			util.PrintLog(fmt.Sprintf("token is %v", tokenStr))
 			c.JSON(http.StatusUnauthorized, model.Response{
 				StatusCode: -1,
 				StatusMsg:  "unauthorized: 用户不存在或者未登录",
@@ -71,6 +76,7 @@ func Auth() gin.HandlerFunc {
 		token, ok := ParseToken(tokenStr)
 		// 如果token无效
 		if !ok {
+			util.PrintLog("token无效")
 			c.JSON(http.StatusForbidden, model.Response{
 				StatusCode: -1,
 				StatusMsg:  "forbidden: token无效",
@@ -81,6 +87,7 @@ func Auth() gin.HandlerFunc {
 
 		// 如果token过期
 		if time.Now().Unix() > token.ExpiresAt {
+			util.PrintLog("token已过期")
 			c.JSON(http.StatusOK, model.Response{
 				StatusCode: -1,
 				StatusMsg:  "token已过期",
@@ -90,7 +97,8 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 		// 将userId写入上下文
-		c.Set("userId", token.UserId)
+		util.PrintLog(fmt.Sprintf(" token没问题 user_id is %v", token.UserId))
+		c.Set("user_id", token.UserId)
 		// 继续执行
 		c.Next()
 	}

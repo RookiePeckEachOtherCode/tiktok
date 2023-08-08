@@ -6,6 +6,9 @@ import (
 
 // gin的ip和端口
 const GIN_IP = "127.0.0.1"
+
+// 本机局域网ip
+const LAN_IP = "192.168.1.6"
 const GIN_PORT = 8080
 
 // SIGN_KEY 是用于签名的密钥
@@ -49,10 +52,10 @@ const MAX_PASSWORD_LEN = 32
 const JWT_KEY = "RookiePeckEachOtherCode"
 
 // VideoSavePath 视频保存路径
-const VIDEO_SAVE_PATH = "/static/assets/video/"
+const VIDEO_SAVE_PATH = "static/assets/video/"
 
 // VideoCoverSavePath 视频封面保存路径
-const VIDEO_COVER_SAVE_PATH = "/static/assets/video_cover/"
+const VIDEO_COVER_SAVE_PATH = "static/assets/cover/"
 
 func Bless() {
 	fmt.Println("                    _ooOoo_")
