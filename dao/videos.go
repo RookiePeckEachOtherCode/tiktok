@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"tiktok/configs"
 	"time"
 )
@@ -52,12 +52,41 @@ func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
 
 	return &vd, err
 }
-func FavoriteVedio(v *Video, act int64) error { //更新点赞数
-	if act == 1 {
-		v.FavoriteCount++
-	} else if act == 0 {
-		v.FavoriteCount--
+func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作，包含对用户喜欢列表
+	userInfo, err := GetUserInfoById(uid)
+	if err != nil {
+		return errors.Wrap(err, "获取用户信息失败")
 	}
-	err := DB.Save(v).Error
-	return err
+	if act == 1 {
+		v.FavoriteCount++                   //喜欢数++
+		v.Users = append(v.Users, userInfo) //添加喜欢用户信息
+		userInfo.FavorVideos = append(userInfo.FavorVideos, v)
+	} else if act == 2 {
+		v.FavoriteCount--
+		var duser UserInfo
+		result := DB.First(&duser, uid) //查找对应的用户对象
+		if result.Error != nil {
+			return errors.New("无法查询到用户")
+		}
+		for i, u := range v.Users {
+			if u.ID == duser.ID {
+				v.Users = append(v.Users[:i], v.Users[i+1:]...) //从当前视频移除对应用户
+				break
+			}
+		}
+		for i, vid := range duser.FavorVideos {
+			if v.ID == vid.ID {
+				duser.FavorVideos = append(duser.FavorVideos[:i], duser.FavorVideos[i+1:]...) //从对象用户中移除视频
+				break
+			}
+		}
+		if err := DB.Save(duser).Error; err != nil {
+			return errors.Wrap(err, "保存用户信息失败")
+		}
+	}
+	if err := DB.Save(v).Error; err != nil {
+		return errors.Wrap(err, "保存视频信息失败")
+	}
+	DB.Model(v).Association("Users").Replace(v.Users) //刷新数据库，使移除喜欢的视频不会回滚到喜欢列表中
+	return nil
 }
