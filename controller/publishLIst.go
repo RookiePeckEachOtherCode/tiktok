@@ -5,6 +5,7 @@ import (
 	"tiktok/dao"
 	"tiktok/model"
 	"tiktok/service"
+	"tiktok/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,6 +20,7 @@ func PublishList(c *gin.Context) {
 	userId, ok := _userId.(int64)
 	//判断用户id类型是否正确
 	if !ok {
+		util.PrintLog("用户id类型错误")
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "用户id类型错误",
@@ -29,6 +31,7 @@ func PublishList(c *gin.Context) {
 	videoList, err := service.GetPublishList(userId)
 
 	if err != nil {
+		util.PrintLog("获取发布列表失败")
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
@@ -44,4 +47,5 @@ func PublishList(c *gin.Context) {
 		VideoList: *videoList,
 	})
 
+	util.PrintLog("获取发布列表成功")
 }
