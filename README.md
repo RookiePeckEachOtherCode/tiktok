@@ -19,7 +19,7 @@
   - 互动接口
     - :white_check_mark: 赞操作[favorite/action/]
     - :white_check_mark: 喜欢列表[favorite/list/]
-    - :warning: 评论操作[comment/action/]
+    - :construction: 评论操作[comment/action/]
     - :warning: 评论列表[comment/list/]
   - 社交接口
     - :warning: 关注操作[relation/action/]
