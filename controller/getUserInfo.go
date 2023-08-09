@@ -1,68 +1,50 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
-	"log"
+	"net/http"
 	"tiktok/dao"
 	"tiktok/model"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserInfoResponse struct {
-	Response model.Response
-	User     *dao.UserInfo `json:"user"`
+type Get struct {
+	Response   model.Response // 用户鉴权token
+	USerInfo   dao.UserInfo   `json:"user"` // 用户id
+	WorkCount  int64          `json:"work_count"`
+	FavorCount int64          `json:"favorite_count"`
 }
 
 func GetUserInfo(c *gin.Context) {
-	_userId, ok := c.Get("user_id")
-
-	log.Printf("--------------------------user_id: %v------------------\n", _userId)
-	log.Printf("--------------------------ok: %v------------------\n", ok)
-
+	_userid, ok := c.Get("user_id")
 	if !ok {
-		log.Println("--------------获取用户信息失败----------------")
-		c.JSON(200, UserInfoResponse{
-			Response: model.Response{
-				StatusCode: 1,
-				StatusMsg:  "获取用户信息失败",
-			},
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "用户id获取失败",
 		})
 		return
 	}
-
-	userInfo, err := ToGetUserInfo(_userId)
-
+	USerId, okk := _userid.(int64)
+	if !okk {
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "断言失败",
+		})
+		return
+	}
+	USerInfo, err := dao.GetUserInfoById(USerId)
 	if err != nil {
-		log.Println("--------------获取用户信息失败----------------")
-		c.JSON(200, UserInfoResponse{
-			Response: model.Response{
-				StatusCode: 1,
-				StatusMsg:  fmt.Errorf("获取用户信息失败: %w", err).Error(),
-			},
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "用户信息获取失败",
 		})
 		return
 	}
-
-	c.JSON(200, UserInfoResponse{
+	c.JSON(http.StatusOK, Get{
 		Response: model.Response{
 			StatusCode: 0,
-			StatusMsg:  "success",
+			StatusMsg:  "用户信息获取成功",
 		},
-		User: userInfo,
+		USerInfo: *USerInfo,
 	})
-}
-func ToGetUserInfo(_userId interface{}) (*dao.UserInfo, error) {
-	userId, ok := _userId.(int64)
-	if !ok {
-		log.Println("------------userId断言----------------")
-		return nil, errors.New("userId类型断言失败")
-	}
-	userInfo, err := dao.GetUserInfoById(userId)
-
-	if err != nil {
-		return nil, err
-	}
-	return userInfo, nil
 }

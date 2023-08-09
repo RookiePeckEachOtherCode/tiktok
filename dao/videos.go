@@ -4,8 +4,6 @@ import (
 	"errors"
 	"tiktok/configs"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Video struct {
@@ -64,70 +62,36 @@ func FavoriteVedio(v *Video, act int64) error { //更新点赞数
 	return err
 }
 
-//	func VideoFavPlus(userId, videoId int64) error {
-//		return DB.Transaction(func(tx *gorm.DB) error {
-//			if err := tx.Exec("UPDATE videos SET favorite_count=favorite_count+1 WHERE id = ?", videoId).Error; err != nil {
-//				return err
-//			}
-//			if err := tx.Exec("INSERT INTO `user_favor_videos` (`user_info_id`,`video_id`) VALUES (?,?)", userId, videoId).Error; err != nil {
-//				return err
-//			}
-//			return nil
-//		})
-//	}
-func VideoFavPlus(userId, videoId int64) error {
+// 	userFavoriteVideo := UserFavoriteVideo{
+// 		UserID:  userId,
+// 		VideoID: videoId,
+// 	}
 
-	tx := DB.Begin()
+// 	// 添加用户点赞视频记录
+// 	if err := tx.Create(&userFavoriteVideo).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
 
-	// 视频点赞数 +1
-	if err := tx.Model(&Video{}).Where("id = ?", videoId).UpdateColumn("favorite_count", gorm.Expr("favorite_count + 1")).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	userFavoriteVideo := UserFavoriteVideo{
-		UserID:  userId,
-		VideoID: videoId,
-	}
-
-	// 添加用户点赞视频记录
-	if err := tx.Create(&userFavoriteVideo).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	//redis.SetFavorateState(userId, videoId, true)
-
-	return tx.Commit().Error
-}
-
-// func VideoFavCancel(userId, videoId int64) error {
-// 	return DB.Transaction(func(tx *gorm.DB) error {
-// 		if err := tx.Exec("UPDATE videos SET favorite_count=favorite_count-1 WHERE id = ? AND favorite_count>0", videoId).Error; err != nil {
-// 			return err
-// 		}
-// 		if err := tx.Exec("DELETE FROM `user_favor_videos`  WHERE `user_info_id` = ? AND `video_id` = ?", userId, videoId).Error; err != nil {
-// 			return err
-// 		}
-// 		return nil
-// 	})
+// 	return tx.Commit().Error
 // }
 
-func VideoFavCancel(userId, videoId int64) error {
+// func VideoFavCancel(userId, videoId int64) error {
 
-	tx := DB.Begin()
+// 	tx := DB.Begin()
 
-	// 视频点赞数-1
-	if err := tx.Model(&Video{}).Where("id = ? AND favorite_count > 0", videoId).UpdateColumn("favorite_count", gorm.Expr("favorite_count - 1")).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+// 	// 视频点赞数-1
+// 	if err := tx.Model(&Video{}).Where("id = ? AND favorite_count > 0", videoId).UpdateColumn("favorite_count", gorm.Expr("favorite_count - 1")).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
 
-	// 删除点赞记录
-	if err := tx.Where("user_info_id = ? AND video_id = ?", userId, videoId).Delete(&UserFavoriteVideo{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+// 	// 删除点赞记录
+// 	if err := tx.Where("user_info_id = ? AND video_id = ?", userId, videoId).Delete(&UserFavoriteVideo{}).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
 
-	//redis.SetFavorateState(userId, videoId, false)
-	return tx.Commit().Error
-}
+// 	//redis.SetFavorateState(userId, videoId, false)
+// 	return tx.Commit().Error
+// }

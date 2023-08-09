@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"tiktok/dao"
-	"tiktok/middleware/redis"
 	"tiktok/util"
 )
 
@@ -39,19 +38,17 @@ func FavoriteActCheck(userId, act int64) error {
 }
 
 func ActFav(userId, videoId int64) error {
-	err := dao.VideoFavPlus(userId, videoId)
+	err := (&dao.UserInfo{ID: userId}).ToFavoriteVideo(&dao.Video{ID: videoId})
 	if err != nil {
 		return err
 	}
-	redis.SetFavorateState(userId, videoId, true)
 	return nil
 }
 func ActUnFav(userId, videoIs int64) error {
-	err := dao.VideoFavCancel(userId, videoIs)
+	err := (&dao.UserInfo{ID: userId}).ToCancelFavorite(&dao.Video{ID: videoIs})
 	if err != nil {
 		return err
 	}
-	redis.SetFavorateState(userId, videoIs, false)
 	return nil
 
 }
