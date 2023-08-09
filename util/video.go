@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"tiktok/configs"
 	"tiktok/dao"
-	"tiktok/middleware/redis"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -28,7 +27,6 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		return nil, errors.New("[UpdateVideoInfo] video size is 0")
 	}
 
-	p := redis.NewProxyIndexMap()
 	latestTime := (*videos)[videoSize-1].CreatedAt
 
 	for i := 0; i < videoSize; i++ {
@@ -37,12 +35,13 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		if err != nil {
 			continue
 		}
-		userInfo.IsFollow = p.GetUserRelation(userId, userInfo.ID)
+		//userInfo.IsFollow = redis.GetUserRelation(userId, userInfo.ID)
 
 		(*videos)[i].Author = *userInfo
 
 		if userId > 0 {
-			(*videos)[i].IsFavorite = p.GetFavorateState(userId, (*videos)[i].ID)
+			//(*videos)[i].IsFavorite = redis.GetFavorateState(userId, (*videos)[i].ID)
+			(*videos)[i].IsFavorite = dao.GetIsFavorite(userId, (*videos)[i].ID)
 		}
 	}
 
