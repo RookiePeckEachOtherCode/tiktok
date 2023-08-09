@@ -8,7 +8,9 @@ import (
 const GIN_IP = "127.0.0.1"
 
 // 本机局域网ip
-const LAN_IP = "localhost"
+// 注释掉就行了，不用删掉 [手动滑稽]
+// const LAN_IP = "localhost"
+const LAN_IP = "192.168.1.6"
 const GIN_PORT = 8080
 
 // SIGN_KEY 是用于签名的密钥
@@ -19,27 +21,18 @@ const MAX_VIDEO_CNT = 30
 
 // mysql的连接信息
 const (
-	DB_USER   = "root"      // 数据库用户名
-	DB_PASSWD = "123456"    // 数据库密码
+	DB_USER = "root" // 数据库用户名
+	//DB_PASSWD = "123456"    // 数据库密码
+	DB_PASSWD = "db22455"   //数据库密码
 	DB_URL    = "127.0.0.1" // 数据库地址
 	PORT      = "3306"      // 数据库端口
-	DB_NAME   = "98k"       // 数据库名称
+	//DB_NAME   = "98k"       // 数据库名称
+	DB_NAME = "tiktok" //数据库名称
 )
 
 // GetDBInfo 返回mysql的连接信息
 func GetDBInfo() string {
 	return DB_USER + ":" + DB_PASSWD + "@tcp(" + DB_URL + ":" + PORT + ")/" + DB_NAME + "?charset=utf8mb4&parseTime=True&loc=Local"
-}
-
-// redis的连接信息
-const (
-	RDB_IP   = "127.0.0.1" // redis地址
-	RDB_PORT = "6379"      // redis端口
-)
-
-// GetRedisInit 返回redis的连接信息
-func GetRedisInit() string {
-	return fmt.Sprintf("%s:%s", RDB_IP, RDB_PORT)
 }
 
 // 注册用户名，最长32个字符

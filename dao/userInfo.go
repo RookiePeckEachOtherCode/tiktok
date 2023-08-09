@@ -107,6 +107,7 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	}
 	return tx.Commit().Error
 }
+
 // 通过id获取用户喜欢的视频列表
 func GetFavList(id int64) ([]*Video, error) {
 	var uinfo UserInfo
@@ -116,5 +117,4 @@ func GetFavList(id int64) ([]*Video, error) {
 	} else {
 		return uinfo.FavorVideos, nil
 	}
-}
 }
