@@ -23,11 +23,14 @@ func Init() *gin.Engine {
 	apiGroup.POST("/user/login/", hash.CheckUserName(), hash.CheckAndHashPassword(), controller.UserLogin)
 	//注册 register 路由
 	apiGroup.POST("/user/register/", hash.CheckUserName(), hash.CheckAndHashPassword(), controller.UserRegister)
+	//注册 userInfo
+	apiGroup.GET("/user", jwt.Auth(), controller.GetUserInfo)
+
 	//注册 publish-action路由
 	apiGroup.POST("/publish/action/", jwt.Auth(), controller.PublishVideo)
 	//注册 get-publish-list路由
 	apiGroup.GET("/publish/list/", jwt.Auth(), controller.PublishList)
 	//注册 FavoriteAct路由
-	apiGroup.POST("/favorite/action/", jwt.Auth(), controller.RecFavorite)
+	apiGroup.POST("/favorite/action/", jwt.Auth(), controller.FavoriteAct)
 	return r
 }
