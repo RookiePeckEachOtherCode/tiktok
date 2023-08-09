@@ -1,4 +1,4 @@
-package service
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,9 +7,9 @@ import (
 	"tiktok/model"
 )
 
-type Gets struct {
+type Get struct {
 	Response model.Response // 用户鉴权token
-	USerInfo dao.UserInfo   `json:"user_info"` // 用户id
+	USerInfo dao.UserInfo   `json:"user"` // 用户id
 }
 
 func GetUserInfo(c *gin.Context) {
@@ -37,7 +37,7 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, Gets{
+	c.JSON(http.StatusOK, Get{
 		Response: model.Response{
 			StatusCode: 0,
 			StatusMsg:  "用户信息获取成功",
