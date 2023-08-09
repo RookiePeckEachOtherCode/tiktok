@@ -104,3 +104,37 @@ func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作�
 	DB.Model(v).Association("Users").Replace(v.Users) //刷新数据库，使移除喜欢的视频不会回滚到喜欢列表中
 	return nil
 }
+
+// 	userFavoriteVideo := UserFavoriteVideo{
+// 		UserID:  userId,
+// 		VideoID: videoId,
+// 	}
+
+// 	// 添加用户点赞视频记录
+// 	if err := tx.Create(&userFavoriteVideo).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	return tx.Commit().Error
+// }
+
+// func VideoFavCancel(userId, videoId int64) error {
+
+// 	tx := DB.Begin()
+
+// 	// 视频点赞数-1
+// 	if err := tx.Model(&Video{}).Where("id = ? AND favorite_count > 0", videoId).UpdateColumn("favorite_count", gorm.Expr("favorite_count - 1")).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	// 删除点赞记录
+// 	if err := tx.Where("user_info_id = ? AND video_id = ?", userId, videoId).Delete(&UserFavoriteVideo{}).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+
+// 	//redis.SetFavorateState(userId, videoId, false)
+// 	return tx.Commit().Error
+// }

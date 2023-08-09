@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"tiktok/dao"
-	"tiktok/middleware/redis"
 	"tiktok/util"
 )
 
@@ -19,8 +18,7 @@ func GetPublishList(userId int64) (*[]dao.Video, error) {
 	util.PrintLog(fmt.Sprintf("调用了service的获取发布列表函数，userId:%d", userId))
 	for i := range *videos {
 		(*videos)[i].Author = *userInfo
-		(*videos)[i].IsFavorite = redis.GetFavorateState(userId, (*videos)[i].ID)
-		//(*videos)[i].IsFavorite = dao.GetIsFavorite(userId, (*videos)[i].ID)
+		(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
 	}
 
 	return videos, nil
