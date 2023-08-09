@@ -2,55 +2,69 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"tiktok/model"
 	"tiktok/service"
+	"tiktok/util"
+
+	"github.com/gin-gonic/gin"
 )
 
-func RecFavorite(c *gin.Context) {
-	Uid, exists := c.Get("user_id")
-	if exists == false {
-		c.JSON(http.StatusBadRequest, model.Response{
+func FavoriteAct(c *gin.Context) {
+	_userId, ok := c.Get("user_id")
+	if !ok {
+		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "获取用户id失败",
+			StatusMsg:  "获取用户id失败1",
 		})
+		return
 	}
-	id, erro := Uid.(int64)
-	if !erro {
-		c.JSON(http.StatusBadRequest, model.Response{
+	userId, ok := _userId.(int64)
+	if !ok {
+		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "断言id失败",
+			StatusMsg:  "获取用户id失败2",
 		})
+		return
 	}
-	vid := c.Query("video_id")                //获取视频id
-	Vid, err := strconv.ParseInt(vid, 10, 64) //格式转换以查询
+
+	_videoId := c.Query("video_id")
+
+	videoId, err := strconv.ParseInt(_videoId, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.Response{
+		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "获取视频id失败",
 		})
+		return
 	}
-	act := c.Query("action_type") //获取点赞类型
-	Act, err := strconv.ParseInt(act, 10, 64)
+
+	_act := c.Query("action_type")
+
+	act, err := strconv.ParseInt(_act, 10, 64)
+
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.Response{
-			StatusCode: 1,
-			StatusMsg:  "点赞失败",
-		})
-	}
-	err = service.HandleFav(Vid, Act, id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, model.Response{
-			StatusCode: 1,
-			StatusMsg:  "点赞保存失败",
-		})
-		fmt.Printf("%v", err)
-	} else {
 		c.JSON(http.StatusOK, model.Response{
-			StatusCode: 0,
-			StatusMsg:  "点赞操作成功",
+			StatusCode: 1,
+			StatusMsg:  "获取act失败",
 		})
+		return
 	}
+
+	util.PrintLog(fmt.Sprintf("userId:%d,videoId:%d,act:%d", userId, videoId, act))
+
+	err = service.HandleFav(userId, videoId, act)
+
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  fmt.Errorf("操作失败: %w", err).Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{
+		StatusCode: 0,
+		StatusMsg:  "success",
+	})
 }
