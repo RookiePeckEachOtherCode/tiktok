@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"tiktok/configs"
@@ -26,7 +27,14 @@ type Videoinfo struct {
 
 func PublishVideo(c *gin.Context) {
 	titile := c.PostForm("title")
-	_userId, _ := c.Get("user_id")
+	_userId, exsist := c.Get("user_id")
+	if !exsist {
+		c.JSON(http.StatusOK, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "用户id 类型错误",
+		})
+		return
+	}
 	userId, ok := _userId.(int64)
 	if !ok {
 		c.JSON(http.StatusOK, model.Response{
@@ -41,6 +49,7 @@ func PublishVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "视频文件错误",
 		})
+		fmt.Printf("%v\n", err)
 		return
 	}
 
@@ -87,12 +96,13 @@ func (v Videoinfo) SaveCover() error {
 	videoPath := v.VideoSavePath
 	coverPath := v.CoverSavePath
 
-	cmd := exec.Command("ffmpeg", "-i", videoPath, "-vframes", "1", "-q:v", "2", coverPath)
-
+	cmd := exec.Command("F:\\ffmpeg-2023-07-19-git-efa6cec759-essentials_build\\bin\\ffmpeg.exe", "-i", videoPath, "-vframes", "1", "-q:v", "2", coverPath)
+	cmd.Env = os.Environ()
 	// 执行命令
 	err := cmd.Run()
 	if err != nil {
-		panic(err)
+		return err
 	}
+
 	return nil
 }
