@@ -61,3 +61,21 @@ func GetFavList(id int64) ([]*Video, error) {
 		return uinfo.FavorVideos, nil
 	}
 }
+
+// 通过用户id和视频对象来查询是否喜欢
+func GetIsFavorite(uid int64, vid int64) bool {
+	favList, err := GetFavList(uid)
+	if err != nil {
+		return false
+	}
+	tagvideo, err := FindVideoByVid(vid)
+	if err != nil {
+		return false
+	}
+	for _, v := range favList {
+		if v.ID == tagvideo.ID {
+			return true
+		}
+	}
+	return false
+}

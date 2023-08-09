@@ -10,12 +10,18 @@ import (
 )
 
 func RecFavorite(c *gin.Context) {
-	uid := c.Query("user_id")
-	id, err2 := strconv.ParseInt(uid, 10, 64)
-	if err2 != nil {
+	Uid, exists := c.Get("user_id")
+	if exists == false {
 		c.JSON(http.StatusBadRequest, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "获取用户id失败",
+		})
+	}
+	id, erro := Uid.(int64)
+	if !erro {
+		c.JSON(http.StatusBadRequest, model.Response{
+			StatusCode: 1,
+			StatusMsg:  "断言id失败",
 		})
 	}
 	vid := c.Query("video_id")                //获取视频id
