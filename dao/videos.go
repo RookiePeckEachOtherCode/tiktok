@@ -61,6 +61,18 @@ func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作�
 		v.FavoriteCount++                   //喜欢数++
 		v.Users = append(v.Users, userInfo) //添加喜欢用户信息
 		userInfo.FavorVideos = append(userInfo.FavorVideos, v)
+		err := DB.Save(v).Error
+		if err != nil {
+			return errors.Wrap(err, "保存视频信息失败")
+		}
+		err1 := DB.Save(userInfo).Error
+		if err != nil {
+			return errors.Wrap(err, "保存用户信息失败")
+		}
+		if err1 != nil {
+			return errors.Wrap(err, "保存视频信息失败")
+		}
+
 	} else if act == 2 {
 		v.FavoriteCount--
 		var duser UserInfo
@@ -80,11 +92,13 @@ func FavoriteVideo(v *Video, act int64, uid int64) error { //更新喜欢操作�
 				break
 			}
 		}
-		if err := DB.Save(duser).Error; err != nil {
+		err := DB.Save(duser).Error
+		if err != nil {
 			return errors.Wrap(err, "保存用户信息失败")
 		}
 	}
-	if err := DB.Save(v).Error; err != nil {
+	err = DB.Save(v).Error
+	if err != nil {
 		return errors.Wrap(err, "保存视频信息失败")
 	}
 	DB.Model(v).Association("Users").Replace(v.Users) //刷新数据库，使移除喜欢的视频不会回滚到喜欢列表中
