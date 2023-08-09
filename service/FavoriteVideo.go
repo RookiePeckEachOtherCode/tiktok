@@ -38,6 +38,10 @@ func FavoriteActCheck(userId, act int64) error {
 }
 
 func ActFav(userId, videoId int64) error {
+	favcheck := (&dao.UserInfo{ID: userId}).Favcheck(&dao.Video{ID: videoId})
+	if favcheck == true {
+		return nil
+	}
 	err := (&dao.UserInfo{ID: userId}).ToFavoriteVideo(&dao.Video{ID: videoId})
 	if err != nil {
 		return err

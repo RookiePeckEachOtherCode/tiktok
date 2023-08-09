@@ -107,6 +107,13 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	}
 	return tx.Commit().Error
 }
+func (u *UserInfo) Favcheck(video *Video) bool { //检查点了没
+	tx := DB.Begin()
+	err := tx.Model(u).Association("FavorVideos").Find(video)
+
+	found := err == nil
+	return found
+}
 
 // 通过id获取用户喜欢的视频列表
 func GetFavList(id int64) ([]*Video, error) {
