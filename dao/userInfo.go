@@ -143,10 +143,54 @@ func (u *UserInfo) Follwcheck(id int64) bool {
 	return count > 0
 }
 
-// func (u *UserInfo) FollowAct(tu *UserInfo) error {
-// 	tx := DB.Begin()
-// 	tx.Model(u)
-// }
+func (u *UserInfo) FollowAct(tu *UserInfo) error {
+	tx := DB.Begin()
+	tx.Model(u)
+	if err := tx.Model(u).Association("Follows").Append(tu); err != nil { //将对方添加到关注列表
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(u).UpdateColumn("follow_count", gorm.Expr("follow_count +1")).Error; err != nil { //自己关注数+1
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(tu).UpdateColumn("follower_count", gorm.Expr("follower_count +1")).Error; err != nil { //对方粉丝数+1
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+// 取关
+func (u *UserInfo) UnFollowAct(tu *UserInfo) error {
+	tx := DB.Begin()
+	if err := tx.Model(u).Association("Follows").Delete(tu); err != nil { //从自己的关注列表移除
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(u).UpdateColumn("follow_count", gorm.Expr("follow_count -1")).Error; err != nil { //自己关注数-1
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(tu).UpdateColumn("follower_count", gorm.Expr("follower_count -1")).Error; err != nil { //对方粉丝数-1
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+// 获取用户关注列表
+func GetFloList(uid int64) ([]*UserInfo, error) {
+	var uinfo UserInfo
+	err := DB.Preload("Follows").First(&uinfo, "id=?", uid).Error
+	if err != nil {
+		return nil, err
+	} else {
+		return uinfo.Follows, nil
+	}
+}
 
 // 根据用户id获取用户关注列表
 func GetFollowerListById(userId int64) ([]*UserInfo, error) {
