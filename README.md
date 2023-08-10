@@ -24,7 +24,7 @@
   - 社交接口
     - :warning: 关注操作[relation/action/]
     - :warning: 关注列表[relation/follow/list/]
-    - :warning: 粉丝列表[relation/follower/list/]
+    - :construction:粉丝列表[relation/follower/list/]
     - :warning: 好友列表[relation/friend/list/]
     - :warning: 发送消息[message/action/]
     - :warning: 聊天记录[message/chat/]
