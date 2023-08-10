@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"tiktok/configs"
 	"tiktok/dao"
-	"tiktok/middleware/redis"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -28,7 +27,6 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		return nil, errors.New("[UpdateVideoInfo] video size is 0")
 	}
 
-	p := redis.NewProxyIndexMap()
 	latestTime := (*videos)[videoSize-1].CreatedAt
 
 	for i := 0; i < videoSize; i++ {
@@ -37,12 +35,11 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		if err != nil {
 			continue
 		}
-		userInfo.IsFollow = p.GetUserRelation(userId, userInfo.ID)
 
 		(*videos)[i].Author = *userInfo
 
 		if userId > 0 {
-			(*videos)[i].IsFavorite = p.GetFavorateState(userId, (*videos)[i].ID)
+			(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
 		}
 	}
 
@@ -54,5 +51,5 @@ func NewFileName(fileName string) string {
 }
 
 func GetFileUrl(name, ty string) string {
-	return fmt.Sprintf("http://%v:%v/%v/%v", configs.GIN_IP, configs.GIN_PORT, ty, name)
+	return fmt.Sprintf("http://%v:%v/%v/%v", configs.LAN_IP, configs.GIN_PORT, ty, name)
 }

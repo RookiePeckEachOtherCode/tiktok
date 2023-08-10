@@ -12,14 +12,14 @@
   - :white_check_mark: 视频流接口[feed/]
   - :white_check_mark: 用户注册[user/register/]
   - :white_check_mark:用户登录[user/login/]
-  - :warning: 用户信息[user/]
+  - :white_check_mark: 用户信息[user/]
   - :white_check_mark: 投稿接口[publish/action/]
   - :white_check_mark:发布列表[publish/list/]
 - 扩展接口
   - 互动接口
     - :white_check_mark: 赞操作[favorite/action/]
     - :white_check_mark: 喜欢列表[favorite/list/]
-    - :warning: 评论操作[comment/action/]
+    - :construction: 评论操作[comment/action/]
     - :warning: 评论列表[comment/list/]
   - 社交接口
     - :warning: 关注操作[relation/action/]

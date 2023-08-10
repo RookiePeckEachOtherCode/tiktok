@@ -2,8 +2,9 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"tiktok/dao"
-	"tiktok/middleware/redis"
+	"tiktok/util"
 )
 
 // GetPublishList 获取发布列表
@@ -14,9 +15,10 @@ func GetPublishList(userId int64) (*[]dao.Video, error) {
 	}
 
 	// 为视频列表添加作者信息
+	util.PrintLog(fmt.Sprintf("调用了service的获取发布列表函数，userId:%d", userId))
 	for i := range *videos {
 		(*videos)[i].Author = *userInfo
-		(*videos)[i].IsFavorite = redis.NewProxyIndexMap().GetFavorateState(userId, (*videos)[i].ID)
+		(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
 	}
 
 	return videos, nil

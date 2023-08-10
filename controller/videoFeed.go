@@ -2,12 +2,14 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	"tiktok/model"
 	"tiktok/service"
+	"tiktok/util"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +27,7 @@ func Feed(c *gin.Context) {
 	var userId int64 = 0
 
 	if ok { //已经登陆
+		util.PrintLog(fmt.Sprintf("已经登陆，token为%v", token))
 		var err error
 		userId, err = AlreadlyLogin(token)
 		if err != nil {
@@ -74,7 +77,7 @@ func Feed(c *gin.Context) {
 func AlreadlyLogin(token string) (int64, error) {
 	claims, ok := jwt.ParseToken(token)
 	if ok {
-		if claims.ExpiresAt > time.Now().Unix() {
+		if claims.ExpiresAt < time.Now().Unix() {
 			return 0, errors.New("登陆过期,请重新登陆")
 		}
 		return claims.UserId, nil

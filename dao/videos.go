@@ -1,9 +1,10 @@
 package dao
 
 import (
-	"errors"
 	"tiktok/configs"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Video struct {
@@ -51,13 +52,4 @@ func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
 	err := DB.Where("id=?", vid).Find(&vd).Error
 
 	return &vd, err
-}
-func FavoriteVedio(v *Video, act int64) error { //更新点赞数
-	if act == 1 {
-		v.FavoriteCount++
-	} else if act == 0 {
-		v.FavoriteCount--
-	}
-	err := DB.Save(v).Error
-	return err
 }
