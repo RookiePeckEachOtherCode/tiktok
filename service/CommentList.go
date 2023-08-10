@@ -7,7 +7,7 @@ import (
 
 type ComListRes struct {
 	model.Response
-	CommentList []*dao.Comment `json:"video_list"`
+	CommentList []*dao.Comment `json:"comment_list"`
 }
 
 func HandleComListQuery(vid int64) (res *ComListRes, err error) {
