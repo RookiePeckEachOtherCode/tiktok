@@ -13,7 +13,7 @@ const (
 )
 
 func HandleFav(userId, videoId, act int64) error {
-	if err := FavoriteActCheck(userId, act); err != nil {
+	if err := FavoriteActCheck(userId, videoId, act); err != nil {
 		util.PrintLog(err.Error())
 		return err
 	}
@@ -27,21 +27,20 @@ func HandleFav(userId, videoId, act int64) error {
 	}
 }
 
-func FavoriteActCheck(userId, act int64) error {
+func FavoriteActCheck(userId, videoId, act int64) error {
 	if userId <= 0 {
 		return errors.New("用户不存在")
 	}
 	if act != Fav && act != UnFav {
 		return errors.New("act参数错误:未定义的操作类型")
 	}
+	if act == Fav && (&dao.UserInfo{ID: userId}).GetIsFavorite(videoId) { //点赞动作，视频已经被点赞，就不用再点赞了
+		return errors.New("视频已经被点赞")
+	}
 	return nil
 }
 
 func ActFav(userId, videoId int64) error {
-	favcheck := (&dao.UserInfo{ID: userId}).Favcheck(&dao.Video{ID: videoId})
-	if favcheck == true {
-		return nil
-	}
 	err := (&dao.UserInfo{ID: userId}).ToFavoriteVideo(&dao.Video{ID: videoId})
 	if err != nil {
 		return err
