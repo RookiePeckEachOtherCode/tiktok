@@ -143,8 +143,47 @@ func (u *UserInfo) Follwcheck(id int64) bool {
 	return count > 0
 }
 
-func (u *UserInfo) FollowAct(tu *UserInfo) error {
-	tx := DB.Begin()
-	tx.Model(u)
+// func (u *UserInfo) FollowAct(tu *UserInfo) error {
+// 	tx := DB.Begin()
+// 	tx.Model(u)
+// }
 
+// 根据用户id获取用户关注列表
+func GetFollowerListById(userId int64) ([]*UserInfo, error) {
+	tx := DB.Begin()
+
+	var userInfo UserInfo
+	var userList []*UserInfo
+
+	if err := tx.Preload("Follows").First(&userInfo, userId).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Model(&userInfo).Association("Follows").Find(&userList); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tx.Commit()
+	return userList, nil
+
+}
+
+// GetUserRelation 判断两个用户之间是否存在关注关系
+func GetUserRelation(uid, tid int64) bool {
+
+	tx := DB.Begin()
+
+	var u, t UserInfo
+
+	// 查询用户 uid 是否关注了用户 tid
+	if err := tx.Model(&u).Where("id = ?", uid).Association("Follows").Find(&t, tid); err != nil {
+		tx.Rollback()
+		return false
+	}
+
+	tx.Commit()
+
+	return true
 }
