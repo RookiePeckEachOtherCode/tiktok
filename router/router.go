@@ -37,8 +37,11 @@ func Init() *gin.Engine {
 	apiGroup.POST("/comment/action/", jwt.Auth(), controller.CommentAct)
 	//注册 获取评论列表 路由
 	apiGroup.GET("/comment/list/", jwt.Auth(), controller.RecComList)
-	//注册 获取关注列表 路由
+	//注册 获取关注者列表 路由
 	apiGroup.GET("/relation/follower/list", jwt.Auth(), controller.GetFollowerList)
-
+	//注册 关注操作 路由
+	apiGroup.POST("/relation/action/", jwt.Auth(), controller.FollowAct)
+	//注册 关注的人列表 路由
+	apiGroup.GET("/relation/follow/list/", jwt.Auth(), controller.FollowList)
 	return r
 }
