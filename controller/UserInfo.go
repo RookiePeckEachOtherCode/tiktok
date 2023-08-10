@@ -1,10 +1,7 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
-	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/model"
 	"tiktok/util"
@@ -15,7 +12,6 @@ import (
 type GetUserInfoResponse struct {
 	Response model.Response // 用户鉴权token
 	USerInfo dao.UserInfo   `json:"user"` // 用户id
-	Avatar   string         `json:"avatar"`
 }
 
 func GetUserInfo(c *gin.Context) {
@@ -44,19 +40,11 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	util.PrintLog(fmt.Sprintf("头像地址：%s", GetAvatar(USerInfo.ID)))
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		Response: model.Response{
 			StatusCode: 0,
 			StatusMsg:  "用户信息获取成功",
 		},
 		USerInfo: *USerInfo,
-		Avatar:   GetAvatar(USerInfo.ID),
 	})
-}
-
-func GetAvatar(userId int64) string {
-	avaterPath := configs.AVATAR_SAVE_PATH
-	which := userId % 10
-	return avaterPath + strconv.Itoa(int(which)) + ".jpg"
 }
