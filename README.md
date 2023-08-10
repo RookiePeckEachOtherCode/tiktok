@@ -22,8 +22,8 @@
     - :construction: 评论操作[comment/action/]
     - :warning: 评论列表[comment/list/]
   - 社交接口
-    - :warning: 关注操作[relation/action/]
-    - :warning: 关注列表[relation/follow/list/]
+    - :construction: 关注操作[relation/action/]
+    - :construction: 关注列表[relation/follow/list/]
     - :warning: 粉丝列表[relation/follower/list/]
     - :warning: 好友列表[relation/friend/list/]
     - :warning: 发送消息[message/action/]
