@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"tiktok/configs"
 	"tiktok/model"
 	"tiktok/service"
@@ -101,9 +102,17 @@ func (v Videoinfo) SaveCover() error {
 		return err
 	}
 
-	// 改用 exec.Command 的正确用法
-	cmd := exec.Command("ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("middleware/ffmpeg/ffmpeg.exe", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
+	case "linux":
+		cmd = exec.Command("middleware/ffmpeg/ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
+	default:
+		cmd = exec.Command("middleware/ffmpeg/ffmpeg.exe", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
+	}
 
+	// 改用 exec.Command 的正确用法
 	err := cmd.Run()
 
 	if err != nil {

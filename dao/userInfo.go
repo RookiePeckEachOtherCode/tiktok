@@ -98,13 +98,6 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	}
 	return tx.Commit().Error
 }
-func (u *UserInfo) Favcheck(video *Video) bool { //检查点了没
-	tx := DB.Begin()
-	err := tx.Model(u).Association("FavorVideos").Find(video)
-
-	found := err == nil
-	return found
-}
 
 // 通过id获取用户喜欢的视频列表
 func GetFavList(id int64) ([]*Video, error) {
@@ -144,6 +137,7 @@ func (u *UserInfo) MinusFavCount() error {
 
 }
 
+
 // 发布评论
 func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) error {
 	comment.UserInfoID = u.ID
@@ -182,4 +176,100 @@ func (u *UserInfo) DeleteComment(commentId string) error {
 	}
 	// 提交事务
 	return tx.Commit().Error
+}
+
+// 判断对方有没有关注当前用户
+func (u *UserInfo) Follwcheck(id int64) bool {
+	tx := DB.Begin()
+	count := tx.Model(u).Where("id=?", id).Association("Follows").Count()
+	return count > 0
+}
+
+func (u *UserInfo) FollowAct(tu *UserInfo) error {
+	tx := DB.Begin()
+	tx.Model(u)
+	if err := tx.Model(u).Association("Follows").Append(tu); err != nil { //将对方添加到关注列表
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(u).UpdateColumn("follow_count", gorm.Expr("follow_count +1")).Error; err != nil { //自己关注数+1
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(tu).UpdateColumn("follower_count", gorm.Expr("follower_count +1")).Error; err != nil { //对方粉丝数+1
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+// 取关
+func (u *UserInfo) UnFollowAct(tu *UserInfo) error {
+	tx := DB.Begin()
+	if err := tx.Model(u).Association("Follows").Delete(tu); err != nil { //从自己的关注列表移除
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(u).UpdateColumn("follow_count", gorm.Expr("follow_count -1")).Error; err != nil { //自己关注数-1
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Model(tu).UpdateColumn("follower_count", gorm.Expr("follower_count -1")).Error; err != nil { //对方粉丝数-1
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
+// 获取用户关注列表
+func GetFloList(uid int64) ([]*UserInfo, error) {
+	var uinfo UserInfo
+	err := DB.Preload("Follows").First(&uinfo, "id=?", uid).Error
+	if err != nil {
+		return nil, err
+	} else {
+		return uinfo.Follows, nil
+	}
+}
+
+// 根据用户id获取用户关注列表
+func GetFollowerListById(userId int64) ([]*UserInfo, error) {
+	tx := DB.Begin()
+
+	var userInfo UserInfo
+	var userList []*UserInfo
+
+	if err := tx.Preload("Follows").First(&userInfo, userId).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Model(&userInfo).Association("Follows").Find(&userList); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tx.Commit()
+	return userList, nil
+
+}
+
+// GetUserRelation 判断两个用户之间是否存在关注关系
+func GetUserRelation(uid, tid int64) bool {
+
+	tx := DB.Begin()
+
+	var u, t UserInfo
+
+	// 查询用户 uid 是否关注了用户 tid
+	if err := tx.Model(&u).Where("id = ?", uid).Association("Follows").Find(&t, tid); err != nil {
+		tx.Rollback()
+		return false
+	}
+
+	tx.Commit()
+
+	return true
 }
