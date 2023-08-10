@@ -97,13 +97,6 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	}
 	return tx.Commit().Error
 }
-func (u *UserInfo) Favcheck(video *Video) bool { //检查点了没
-	tx := DB.Begin()
-	err := tx.Model(u).Association("FavorVideos").Find(video)
-
-	found := err == nil
-	return found
-}
 
 // 通过id获取用户喜欢的视频列表
 func GetFavList(id int64) ([]*Video, error) {
@@ -140,5 +133,18 @@ func (u *UserInfo) MinusFavCount() error {
 	}
 
 	return tx.Commit().Error
+
+}
+
+// 判断对方有没有关注当前用户
+func (u *UserInfo) Follwcheck(id int64) bool {
+	tx := DB.Begin()
+	count := tx.Model(u).Where("id=?", id).Association("Follows").Count()
+	return count > 0
+}
+
+func (u *UserInfo) FollowAct(tu *UserInfo) error {
+	tx := DB.Begin()
+	tx.Model(u)
 
 }
