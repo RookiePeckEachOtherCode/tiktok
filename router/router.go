@@ -33,7 +33,12 @@ func Init() *gin.Engine {
 	apiGroup.POST("/favorite/action/", jwt.Auth(), controller.FavoriteAct)
 	//注册 获取喜欢列表 路由
 	apiGroup.GET("/favorite/list/", jwt.Auth(), controller.RecFavList)
+	//注册 评论 路由
+	apiGroup.POST("/comment/action/", jwt.Auth(), controller.CommentAct)
+	//注册 获取评论列表 路由
+	apiGroup.GET("/comment/list/", jwt.Auth(), controller.RecComList)
 	//注册 获取关注列表 路由
 	apiGroup.GET("/relation/follower/list", jwt.Auth(), controller.GetFollowerList)
+
 	return r
 }
