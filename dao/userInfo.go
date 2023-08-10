@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-
 	"gorm.io/gorm"
 )
 
@@ -141,4 +140,38 @@ func (u *UserInfo) MinusFavCount() error {
 
 	return tx.Commit().Error
 
+}
+
+// 发布评论
+func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) error {
+	tx := DB.Begin()
+	if err := tx.Model(video).UpdateColumn("comment_count", gorm.Expr("comment_count + 1")).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err2 := tx.Model(u).Association("Comments").Append(comment); err2 != nil {
+		tx.Rollback()
+		return err2
+	}
+	//redis.SetFavorateState(userId, videoId, true)
+	return tx.Commit().Error
+}
+
+// 删除评论
+func (u *UserInfo) DeleteComment(text string, video *Video) error {
+	tx := DB.Begin()
+	if err2 := tx.Model(video).Where("comment_count > 0").UpdateColumn("comment_count", gorm.Expr("comment_count - 1")).Error; err2 != nil {
+		tx.Rollback()
+		return err2
+	}
+	comment, err1 := FindComment(text)
+	if err1 != nil {
+		tx.Rollback()
+		return err1
+	}
+	if err3 := tx.Model(u).Association("Comments").Delete(comment); err3 != nil {
+		tx.Rollback()
+		return err3
+	}
+	return tx.Commit().Error
 }

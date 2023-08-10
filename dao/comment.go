@@ -11,3 +11,9 @@ type Comment struct {
 	CreatedAt  time.Time `gorm:"column:created_at" json:"-"`    // 评论创建时间
 	CreateDate string    `gorm:"-" json:"create_date"`
 }
+
+func FindComment(cid string) (*Comment, error) { //通过评论id查询评论
+	var comment Comment
+	err := DB.Where("id=?", cid).Find(&comment).Error
+	return &comment, err
+}

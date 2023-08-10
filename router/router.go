@@ -33,5 +33,9 @@ func Init() *gin.Engine {
 	apiGroup.POST("/favorite/action/", jwt.Auth(), controller.FavoriteAct)
 	//注册 FavList路由
 	apiGroup.GET("/favorite/list/", jwt.Auth(), controller.RecFavList)
+	//注册 CommentAct路由
+	apiGroup.POST("/comment/action/", jwt.Auth(), controller.CommentAct)
+	//注册 ComList路由
+	apiGroup.GET("/comment/list/", jwt.Auth(), controller.RecComList)
 	return r
 }
