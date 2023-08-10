@@ -50,6 +50,9 @@ const VIDEO_SAVE_PATH = "static/assets/video/"
 // VideoCoverSavePath 视频封面保存路径
 const VIDEO_COVER_SAVE_PATH = "static/assets/cover/"
 
+// 头像保存路径
+const AVATAR_SAVE_PATH = "static/assets/avatar/"
+
 func Bless() {
 	fmt.Println("                    _ooOoo_")
 	fmt.Println("                   o8888888o")
