@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"tiktok/dao"
 	"tiktok/model"
+	"tiktok/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,7 @@ type GetUserInfoResponse struct {
 }
 
 func GetUserInfo(c *gin.Context) {
+	util.PrintLog("在调用GetUserInfoById方法")
 	_userid, ok := c.Get("user_id")
 	if !ok {
 		c.JSON(http.StatusOK, model.Response{
