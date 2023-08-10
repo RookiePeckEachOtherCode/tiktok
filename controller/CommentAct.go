@@ -2,18 +2,18 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"tiktok/dao"
 	"tiktok/model"
 	"tiktok/service"
-	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-type get struct {
+type CommentActResponse struct {
 	Response model.Response
-	comment  dao.Comment
+	Comment  dao.Comment
 }
 
 func CommentAct(c *gin.Context) {
@@ -57,7 +57,7 @@ func CommentAct(c *gin.Context) {
 	}
 	if Actiontype == 1 {
 		Commenttext := c.Query("comment_text")
-		comment = &dao.Comment{UserInfoID: userid, VideoID: Videoid, User: *user, Content: Commenttext, CreatedAt: time.Now(), CreateDate: time.Now().Format("2006-01-02")}
+		comment = &dao.Comment{UserInfoID: userid, VideoID: Videoid, User: *user, Content: Commenttext}
 		err2 := service.OperateComment(Videoid, userid, Actiontype, Commenttext, comment)
 		if err2 != nil {
 			c.JSON(http.StatusOK, model.Response{
@@ -67,12 +67,14 @@ func CommentAct(c *gin.Context) {
 			fmt.Printf("%v", err2)
 			return
 		}
-		c.JSON(http.StatusOK, get{
+		comment.CreatedDate = comment.CreatedAt.Format("01-02")
+
+		c.JSON(http.StatusOK, CommentActResponse{
 			Response: model.Response{
 				StatusCode: 0,
 				StatusMsg:  "发布评论成功",
 			},
-			comment: *comment,
+			Comment: *comment,
 		})
 	} else {
 		Commentid := c.Query("comment_id")

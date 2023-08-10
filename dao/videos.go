@@ -56,11 +56,10 @@ func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
 
 // 通过视频id获取评论列表
 func GetCommentList(id int64) ([]*Comment, error) {
-	var video Video
-	err := DB.Preload("Comments").First(&video, "id=?", id).Error
-	if err != nil {
+	var comment []*Comment
+
+	if err := DB.Model(&Comment{}).Where("video_id=?", id).Find(&comment).Error; err != nil {
 		return nil, err
-	} else {
-		return video.Comments, err
 	}
+	return comment, nil
 }

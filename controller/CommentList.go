@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"tiktok/model"
 	"tiktok/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RecComList(c *gin.Context) {
@@ -26,10 +26,7 @@ func RecComList(c *gin.Context) {
 				StatusMsg:  "获取评论列表失败",
 			},
 		})
-		fmt.Printf("%v\n", err)
 	} else {
 		c.JSON(http.StatusOK, res)
-		println("已经上传了评论列表")
 	}
-
 }

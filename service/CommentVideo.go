@@ -18,7 +18,6 @@ func OperateComment(videoid int64, userid int64, act int64, text string, comment
 	} else {
 		return errors.New("未定义的操作类型")
 	}
-	return nil
 }
 func CommentActCheck(userId, videoId, act int64) error {
 	if userId <= 0 {
@@ -39,8 +38,8 @@ func Act1(userId, videoId int64, text string, comment *dao.Comment) error {
 }
 func Act2(userId, videoIs int64, text string) error {
 	user := &dao.UserInfo{ID: userId}
-	//视频的评论数-1
-	if err := (user).ToCancelFavorite(&dao.Video{ID: videoIs}); err != nil {
+	//删除评论 && 评论数-1
+	if err := (user).DeleteComment(text); err != nil {
 		return err
 	}
 	return nil

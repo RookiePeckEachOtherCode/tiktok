@@ -2,6 +2,8 @@ package dao
 
 import (
 	"errors"
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -15,7 +17,7 @@ type UserInfo struct {
 	Videos         []*Video    `json:"-"`                                                //用户与视频的一对多
 	Follows        []*UserInfo `json:"-" gorm:"many2many:user_relations;"`               //用户与关注用户之间的多对多
 	FavorVideos    []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`            //用户与喜欢视频之间的多对多
-	Comments       []*Comment  `json:"-"`                                                //用户与评论的一对
+	Comments       []*Comment  `json:"-"`                                                //用户与评论的一对多
 	TotalFavorited int64       `json:"total_favorited" gorm:"total_favorited,omitempty"` //用户获赞数
 	WorkCount      int64       `json:"work_count" gorm:"-"`
 }
@@ -144,34 +146,40 @@ func (u *UserInfo) MinusFavCount() error {
 
 // 发布评论
 func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) error {
-	tx := DB.Begin()
-	if err := tx.Model(video).UpdateColumn("comment_count", gorm.Expr("comment_count + 1")).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err2 := tx.Model(u).Association("Comments").Append(comment); err2 != nil {
-		tx.Rollback()
-		return err2
-	}
-	//redis.SetFavorateState(userId, videoId, true)
-	return tx.Commit().Error
+	comment.UserInfoID = u.ID
+	comment.VideoID = video.ID
+	comment.Content = text
+	comment.CreatedAt = time.Now()
+
+	return DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&Comment{}).Create(&comment).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&Video{}).Where("id = ?", comment.VideoID).UpdateColumn("comment_count", gorm.Expr("comment_count + 1")).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
 }
 
 // 删除评论
-func (u *UserInfo) DeleteComment(text string, video *Video) error {
+func (u *UserInfo) DeleteComment(commentId string) error {
+	// 开启事务
 	tx := DB.Begin()
-	if err2 := tx.Model(video).Where("comment_count > 0").UpdateColumn("comment_count", gorm.Expr("comment_count - 1")).Error; err2 != nil {
+	// 查询评论
+	var comment Comment
+	tx.First(&comment, commentId)
+	// 评论数-1
+	if err := tx.Model(&Video{ID: comment.ID}).Where("comment_count>0").UpdateColumn("comment_count", gorm.Expr("comment_count - ?", 1)).Error; err != nil {
 		tx.Rollback()
-		return err2
+		return err
 	}
-	comment, err1 := FindComment(text)
-	if err1 != nil {
+	// 删除评论
+	if err := tx.Delete(&comment).Error; err != nil {
 		tx.Rollback()
-		return err1
+		return err
 	}
-	if err3 := tx.Model(u).Association("Comments").Delete(comment); err3 != nil {
-		tx.Rollback()
-		return err3
-	}
+	// 提交事务
 	return tx.Commit().Error
 }

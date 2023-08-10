@@ -15,9 +15,25 @@ func HandleComListQuery(vid int64) (res *ComListRes, err error) {
 	if err != nil {
 		return nil, err
 	}
-	res = &ComListRes{}
-	res.CommentList = clist
-	res.StatusCode = 0
-	res.StatusMsg = "获取列表成功"
+
+	//添加评论信息
+	//因为数据库没有存储UserInfo,和CreatedDate
+	for _, v := range clist {
+		userInfo, err := dao.GetUserInfoById(v.UserInfoID)
+		if err != nil {
+			return nil, err
+		}
+		v.User = *userInfo
+		v.CreatedDate = v.CreatedAt.Format("01-02")
+	}
+
+	res = &ComListRes{
+		Response: model.Response{
+			StatusCode: 0,
+			StatusMsg:  "获取评论列表成功",
+		},
+		CommentList: clist,
+	}
+
 	return res, nil
 }
