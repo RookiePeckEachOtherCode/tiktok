@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"tiktok/dao"
 	"tiktok/model"
 	"tiktok/service"
+	"tiktok/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +30,7 @@ func GetFollowerList(c *gin.Context) {
 	userList, err := service.GetFollowerList(userId)
 
 	if err != nil {
+		util.PrintLog(fmt.Sprintf("获取关注列表失败，err:%v", err))
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error(),
@@ -35,6 +38,7 @@ func GetFollowerList(c *gin.Context) {
 		return
 	}
 
+	util.PrintLog(fmt.Sprintf("获取关注列表成功，userList:%v", userList))
 	c.JSON(http.StatusOK, GetFollowerListResponse{
 		Response: model.Response{
 			StatusCode: 0,

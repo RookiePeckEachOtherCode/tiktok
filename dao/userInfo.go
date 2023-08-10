@@ -155,12 +155,12 @@ func GetFollowerListById(userId int64) ([]*UserInfo, error) {
 	var userInfo UserInfo
 	var userList []*UserInfo
 
-	if err := tx.Preload("Fans").First(&userInfo, userId).Error; err != nil {
+	if err := tx.Preload("Follows").First(&userInfo, userId).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	if err := tx.Model(&userInfo).Association("Fans").Find(&userList); err != nil {
+	if err := tx.Model(&userInfo).Association("Follows").Find(&userList); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
