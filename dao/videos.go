@@ -26,9 +26,10 @@ type Video struct {
 // GetVideoListByLastTime 根据上传时间获取视频列表
 func GetVideoListByLastTime(lastTime time.Time) (*[]*Video, error) {
 	var videos []*Video
-
-	err := DB.Model(&Video{}).Where("created_at<?", lastTime).Order("created_at ASC").Limit(configs.MAX_VIDEO_CNT).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).Find(&videos).Error
-
+	err := DB.Model(&Video{}).Where("created_at<?", lastTime).
+		Order("created_at DESC").Limit(configs.MAX_VIDEO_CNT).
+		Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).
+		Find(&videos).Error
 	return &videos, err
 }
 
