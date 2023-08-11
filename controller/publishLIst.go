@@ -39,6 +39,7 @@ func PublishList(c *gin.Context) {
 		return
 	}
 
+
 	c.JSON(http.StatusOK, PublishListResponse{
 		Response: model.Response{
 			StatusCode: 0,

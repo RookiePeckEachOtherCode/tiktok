@@ -21,6 +21,7 @@ type UserInfo struct {
 	Comments       []*Comment  `json:"-"`                                                //用户与评论的一对多
 	TotalFavorited int64       `json:"total_favorited" gorm:"total_favorited,omitempty"` //用户获赞数
 	WorkCount      int64       `json:"work_count" gorm:"-"`
+	FavoriteCount  int64       `json:"favorite_count" gorm:"-"`
 }
 
 // GetUserInfoById 根据用户id获取用户信息
