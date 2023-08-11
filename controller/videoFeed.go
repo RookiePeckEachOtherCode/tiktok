@@ -2,13 +2,11 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"tiktok/middleware/jwt"
 	"tiktok/model"
 	"tiktok/service"
-	"tiktok/util"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +52,6 @@ func Feed(c *gin.Context) {
 		return
 	}
 
-	util.PrintLog(fmt.Sprintf("Feed视频列表为%v", feedVideos.VideoList))
 	c.JSON(http.StatusOK, FeedResponse{
 		Response: model.Response{
 			StatusCode: 0,
