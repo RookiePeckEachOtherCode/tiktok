@@ -31,11 +31,10 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 
 	for i := 0; i < videoSize; i++ {
 		userInfo, err := dao.GetUserInfoById((*videos)[i].UserInfoID)
-
 		if err != nil {
 			continue
 		}
-
+		userInfo.IsFollow = dao.GetUserRelation(userId, userInfo.ID)
 		(*videos)[i].Author = *userInfo
 
 		if userId > 0 {
