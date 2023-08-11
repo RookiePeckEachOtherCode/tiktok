@@ -2,14 +2,11 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	"tiktok/model"
 	"tiktok/service"
-	"tiktok/util"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,41 +15,32 @@ import (
 // FeedResponse 结构体定义了响应的状态码、状态信息和 FeedVideoFlow
 type FeedResponse struct {
 	model.Response
-	NextTime  int64        `json:"next_time"`  //发布最早的时间，作为下次请求时的latest_time
-	VideoList []*dao.Video `json:"video_list"` //视频列表
+	*service.FeedVideoFlow
 }
 
 func Feed(c *gin.Context) {
 	token, ok := c.GetQuery("token")
-	var userId int64 = 0
 
-	if ok { //已经登陆
-		util.PrintLog(fmt.Sprintf("已经登陆，token为%v", token))
-		var err error
-		userId, err = AlreadlyLogin(token)
-		if err != nil {
-			c.JSON(200, FeedResponse{
-				Response: model.Response{
-					StatusCode: 400,
-					StatusMsg:  err.Error(),
-				},
+	var userId int64 = 0
+	if ok {
+		if _userId, err := AlreadlyLogin(token); err == nil {
+			userId = _userId
+		} else {
+			c.JSON(http.StatusOK, model.Response{
+				StatusCode: 1,
+				StatusMsg:  err.Error(),
 			})
-			return
 		}
 	}
 
-	latestTime, err := ParseLatestTime(c)
+	var latestTime time.Time
+	_latestTime, err := strconv.ParseInt(c.Query("latest_time"), 10, 64)
+
 	if err != nil {
-		c.JSON(200, FeedResponse{
-			Response: model.Response{
-				StatusCode: 1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		return
+		latestTime = time.Unix(0, _latestTime*1e6)
 	}
 
-	videos, nextTime, err := service.Feed(userId, latestTime)
+	feedVideos, err := service.Feed(userId, latestTime)
 
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{
@@ -69,8 +57,7 @@ func Feed(c *gin.Context) {
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		NextTime:  nextTime,
-		VideoList: videos,
+		FeedVideoFlow: feedVideos,
 	})
 }
 

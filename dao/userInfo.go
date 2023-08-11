@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -31,6 +32,8 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	if userInfo.ID == 0 {
 		return nil, errors.New("该用户不存在")
 	}
+
+	log.Println("userInfo: ", userInfo)
 
 	return &userInfo, nil
 }
@@ -136,7 +139,6 @@ func (u *UserInfo) MinusFavCount() error {
 	return tx.Commit().Error
 
 }
-
 
 // 发布评论
 func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) error {
