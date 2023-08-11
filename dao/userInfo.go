@@ -27,7 +27,7 @@ type UserInfo struct {
 func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
 
-	DB.Model(&UserInfo{}).Where("id=?", userId).Select([]string{"id", "name", "follow_count", "follower_count", "is_follow", "total_favorited"}).First(&userInfo)
+	DB.Model(&UserInfo{}).Where("id=?", userId).First(&userInfo)
 
 	if userInfo.ID == 0 {
 		return nil, errors.New("该用户不存在")
@@ -259,19 +259,13 @@ func GetFollowerListById(userId int64) ([]*UserInfo, error) {
 }
 
 // GetUserRelation 判断两个用户之间是否存在关注关系
-func GetUserRelation(uid, tid int64) bool {
-
+func GetUserRelation(uid, tid int64) bool { //uid是否关注tid
 	tx := DB.Begin()
-
-	var u, t UserInfo
-
-	// 查询用户 uid 是否关注了用户 tid
-	if err := tx.Model(&u).Where("id = ?", uid).Association("Follows").Find(&t, tid); err != nil {
+	var userInfo UserInfo
+	if err := tx.Preload("Follows").First(&userInfo, uid).Error; err != nil {
 		tx.Rollback()
 		return false
 	}
-
-	tx.Commit()
-
-	return true
+	count := tx.Model(&userInfo).Where("id=?", tid).Association("Follows").Count()
+	return count > 0
 }
