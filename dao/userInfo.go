@@ -137,7 +137,6 @@ func (u *UserInfo) MinusFavCount() error {
 
 }
 
-
 // 发布评论
 func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) error {
 	comment.UserInfoID = u.ID
@@ -234,7 +233,7 @@ func GetFloList(uid int64) ([]*UserInfo, error) {
 	}
 }
 
-// 根据用户id获取用户关注列表
+// 根据用户id获取用户关注者列表
 func GetFollowerListById(userId int64) ([]*UserInfo, error) {
 	tx := DB.Begin()
 
