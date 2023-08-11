@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"tiktok/dao"
+	"tiktok/middleware/redis"
 )
 
 func GetFollowerList(userId int64) ([]*dao.UserInfo, error) {
@@ -17,7 +18,8 @@ func GetFollowerList(userId int64) ([]*dao.UserInfo, error) {
 	}
 
 	for _, v := range userList {
-		v.IsFollow = dao.GetUserRelation(userId, v.ID)
+		//v.IsFollow = dao.GetUserRelation(userId, v.ID)
+		v.IsFollow = redis.New().GetUserRelation(userId, v.ID)
 	}
 
 	return userList, nil

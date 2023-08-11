@@ -2,7 +2,7 @@ package dao
 
 import (
 	"errors"
-	"log"
+	"tiktok/middleware/redis"
 	"time"
 
 	"gorm.io/gorm"
@@ -21,21 +21,15 @@ type UserInfo struct {
 	Comments       []*Comment  `json:"-"`                                                //用户与评论的一对多
 	TotalFavorited int64       `json:"total_favorited" gorm:"total_favorited,omitempty"` //用户获赞数
 	WorkCount      int64       `json:"work_count" gorm:"-"`
-	FavoriteCount  int64       `json:"favorite_count" gorm:"-"`
 }
 
 // GetUserInfoById 根据用户id获取用户信息
 func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
-
 	DB.Model(&UserInfo{}).Where("id=?", userId).First(&userInfo)
-
 	if userInfo.ID == 0 {
-		return nil, errors.New("该用户不存在")
+		return nil, errors.New("用户不存在")
 	}
-
-	log.Println("userInfo: ", userInfo)
-
 	return &userInfo, nil
 }
 
@@ -82,7 +76,9 @@ func (u *UserInfo) ToFavoriteVideo(video *Video) error {
 		tx.Rollback()
 		return err
 	}
-	//redis.SetFavorateState(userId, videoId, true)
+	if redis.IsInit {
+		redis.New().UpdateFavoriteState(u.ID, video.ID, true)
+	}
 	return tx.Commit().Error
 }
 
@@ -100,13 +96,16 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 		tx.Rollback()
 		return err
 	}
+	if redis.IsInit {
+		redis.New().UpdateFavoriteState(u.ID, video.ID, false)
+	}
 	return tx.Commit().Error
 }
 
 // 通过id获取用户喜欢的视频列表
-func GetFavList(id int64) ([]*Video, error) {
+func GetFavList(userId int64) ([]*Video, error) {
 	var uinfo UserInfo
-	err := DB.Preload("FavorVideos").First(&uinfo, "id=?", id).Error
+	err := DB.Preload("FavorVideos").First(&uinfo, "id=?", userId).Error
 	if err != nil {
 		return nil, err
 	} else {

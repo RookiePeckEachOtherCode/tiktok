@@ -2,22 +2,29 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
-	"strconv"
 	"tiktok/model"
 	"tiktok/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func RecFavList(c *gin.Context) {
-	Uid := c.Query("user_id")
-	uid, err := strconv.ParseInt(Uid, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			StatusCode: 1,
-			StatusMsg:  "无法获取用户id",
+	_uid, _ := c.Get("user_id")
+	uid, ok := _uid.(int64)
+
+	if !ok {
+		log.Println("用户id解析失败")
+		c.JSON(http.StatusBadRequest, service.FavListRes{
+			Response: model.Response{
+				StatusCode: 1,
+				StatusMsg:  "用户id解析失败",
+			},
 		})
+		return
 	}
+
 	res, err := service.HandleFavListQuery(uid)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, service.FavListRes{

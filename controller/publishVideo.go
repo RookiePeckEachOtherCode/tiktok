@@ -28,29 +28,26 @@ type Videoinfo struct {
 
 func PublishVideo(c *gin.Context) {
 	titile := c.PostForm("title")
-	_userId, exsist := c.Get("user_id")
-	if !exsist {
-		c.JSON(http.StatusOK, model.Response{
-			StatusCode: 1,
-			StatusMsg:  "用户id 类型错误",
-		})
-		return
-	}
+	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
+
 	if !ok {
+		log.Println("用户id解析失败")
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "用户id 类型错误",
+			StatusMsg:  "用户id解析失败",
 		})
 		return
 	}
+
 	data, err := c.FormFile("data")
+
 	if err != nil {
+		log.Println("视频获取失败: ", err)
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频文件错误",
+			StatusMsg:  "视频获取失败",
 		})
-		fmt.Printf("%v\n", err)
 		return
 	}
 
@@ -63,20 +60,25 @@ func PublishVideo(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  fmt.Sprintf("视频保存失败: %s", err.Error()),
 		})
-		log.Printf("%v\n", err)
+		log.Println("视频保存失败: ", err)
 		return
 	}
 	if err := videoinfo.SaveCover(); err != nil {
+		log.Println("封面保存失败: ", err)
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  fmt.Sprintf("封面保存失败: %s", err.Error()),
 		})
-		log.Printf("%v\n", err)
 		return
 	}
-
 	//持久化
-	service.PublishVideo(userId, videoinfo.VideoName, videoinfo.CoverName, titile)
+	if err := service.PublishVideo(userId, videoinfo.VideoName, videoinfo.CoverName, titile); err != nil {
+		log.Println("视频持久化失败: ", err)
+	}
+	c.JSON(http.StatusOK, model.Response{
+		StatusCode: 0,
+		StatusMsg:  "视频发布成功",
+	})
 }
 
 func GetVideoInfo(file *multipart.FileHeader) *Videoinfo {

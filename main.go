@@ -12,8 +12,6 @@ func main() {
 	configs.Bless()
 	// 初始化数据库
 	dao.InitDb()
-	// 初始化redis
-	//redis.Init()
 	// 初始化路由
 	InitGin()
 
