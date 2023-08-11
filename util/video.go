@@ -38,7 +38,8 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		(*videos)[i].Author = *userInfo
 
 		if userId > 0 {
-			(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
+			_user := dao.UserInfo{ID: userId}
+			(*videos)[i].IsFavorite = _user.GetIsFavorite((*videos)[i].ID)
 		}
 	}
 

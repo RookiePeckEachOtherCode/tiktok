@@ -13,22 +13,6 @@ type FeedVideoFlow struct {
 	VideoList *[]*dao.Video `json:"video_list"` //视频列表
 }
 
-// func Feed(userId int64, lastTime time.Time) ([]*dao.Video, int64, error) {
-// 	videos, err := dao.GetVideoListByLastTime(lastTime)
-// 	if err != nil {
-// 		return nil, 0, fmt.Errorf("dao.GetVideoListByLastTime error: %v", err)
-// 	}
-// 	lastestTime, _ := util.UpdateVideoInfo(userId, &videos)
-// 	if lastestTime != nil {
-// 		//latestTime不为空表示还有更早的视频,使用其时间戳获取下一页
-// 		nextTime := (lastestTime.UnixNano() / int64(time.Millisecond))
-// 		return videos, nextTime, nil
-// 	}
-// 	//latestTime为空表示已取到最新视频,需要使用当前时间获取下一页
-// 	nextTime := (time.Now().UnixNano() / int64(time.Millisecond))
-
-//		return videos, nextTime, nil
-//	}
 func Feed(userId int64, latestTime time.Time) (*FeedVideoFlow, error) {
 	if latestTime.IsZero() {
 		latestTime = time.Now()
@@ -46,8 +30,9 @@ func Feed(userId int64, latestTime time.Time) (*FeedVideoFlow, error) {
 
 	if _latestTime != nil {
 		nextTime = (*_latestTime).UnixNano() / 1e6
+	} else {
+		nextTime = time.Now().Unix() / 1e6
 	}
-	nextTime = time.Now().Unix() / 1e6
 
 	return &FeedVideoFlow{
 		NextTime:  nextTime,
