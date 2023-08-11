@@ -21,6 +21,7 @@ func GetPublishList(userId int64) (*[]dao.Video, error) {
 		(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
 	}
 
+
 	return videos, nil
 }
 
