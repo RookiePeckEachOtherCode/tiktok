@@ -22,6 +22,7 @@ type UserInfo struct {
 	TotalFavorited int64       `json:"total_favorited" gorm:"total_favorited,omitempty"` //用户获赞数
 	WorkCount      int64       `json:"work_count" gorm:"-"`
 	Avatar         string      `json:"avatar" gorm:"avatar,omitempty"`
+	FavoriteCount  int64       `json:"favorite_count" gorm:"-"` //用户喜欢的视频数
 }
 
 // GetUserInfoById 根据用户id获取用户信息
@@ -31,6 +32,7 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	if userInfo.ID == 0 {
 		return nil, errors.New("用户不存在")
 	}
+	userInfo.FavoriteCount = redis.New().GetUserFavoriteCount(userId)
 	return &userInfo, nil
 }
 

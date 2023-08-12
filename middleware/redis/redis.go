@@ -57,3 +57,9 @@ func (r *Redis) GetUserRelation(userId int64, tid int64) bool {
 	ret := rdb.SIsMember(ctx, key, tid)
 	return ret.Val()
 }
+
+func (r *Redis) GetUserFavoriteCount(uid int64) int64 {
+	key := fmt.Sprintf("%s:%d", "favorite", uid)
+	count := rdb.SCard(ctx, key).Val()
+	return count
+}
