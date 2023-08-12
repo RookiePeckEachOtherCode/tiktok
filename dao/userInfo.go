@@ -28,7 +28,7 @@ type UserInfo struct {
 // GetUserInfoById 根据用户id获取用户信息
 func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
-	DB.Where("id=?", userId).Select([]string{"id", "name", "follow_count", "follower_count", "is_follow"}).First(&userInfo)
+	DB.Where("id=?", userId).First(&userInfo)
 
 	if userInfo.ID == 0 {
 		return nil, errors.New("用户不存在")
