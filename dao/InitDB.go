@@ -28,9 +28,7 @@ func InitDb() {
 	var err error
 	dsn := configs.GetDBInfo()
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger:                 newLogger,
-		PrepareStmt:            true,
-		SkipDefaultTransaction: true,
+		Logger: newLogger,
 	})
 
 	if err != nil {
