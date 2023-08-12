@@ -51,6 +51,8 @@ const VIDEO_SAVE_PATH = "static/assets/video/"
 // VideoCoverSavePath 视频封面保存路径
 const VIDEO_COVER_SAVE_PATH = "static/assets/cover/"
 
+const AVATAR_SAVE_PATH = "static/assets/avatar/"
+
 const (
 	REDIS_URL  = "127.0.0.1"
 	REDIS_PORT = "6379"

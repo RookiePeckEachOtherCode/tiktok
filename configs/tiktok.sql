@@ -7,7 +7,7 @@ CREATE TABLE `comments` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
   `user_info_id` bigint DEFAULT NULL COMMENT '用户信息ID',
   `video_id` bigint DEFAULT NULL COMMENT '视频ID',
-  `content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '评论内容',
+  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '评论内容',
   `created_at` datetime(3) DEFAULT NULL COMMENT '评论创建时间',
   PRIMARY KEY (`id`),
   KEY `fk_videos_comments` (`video_id`),
@@ -31,10 +31,12 @@ CREATE TABLE `user_favor_videos` (
 DROP TABLE IF EXISTS `user_infos`;
 CREATE TABLE `user_infos` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户信息ID',
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户名',
-  `follow_count` bigint DEFAULT NULL COMMENT '关注数',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户名',
+  `follow_count` bigint DEFAULT NULL  COMMENT '关注数',
   `follower_count` bigint DEFAULT NULL COMMENT '粉丝数',
   `is_follow` tinyint(1) DEFAULT NULL COMMENT '是否关注',
+  `total_favorited` bigint DEFAULT NULL COMMENT '获得的点赞数',
+  `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '头像地址',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -66,12 +68,12 @@ DROP TABLE IF EXISTS `videos`;
 CREATE TABLE `videos` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '视频ID',
   `user_info_id` bigint DEFAULT NULL COMMENT '用户信息ID',
-  `play_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '播放链接',
-  `cover_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面链接',
+  `play_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '播放链接',
+  `cover_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面链接',
   `favorite_count` bigint DEFAULT NULL COMMENT '收藏数',
   `comment_count` bigint DEFAULT NULL COMMENT '评论数',
   `is_favorite` tinyint(1) DEFAULT NULL COMMENT '是否收藏',
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '视频标题',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '视频标题',
   `created_at` datetime(3) DEFAULT NULL COMMENT '视频创建时间',
   `updated_at` datetime(3) DEFAULT NULL COMMENT '视频更新时间',
   PRIMARY KEY (`id`),

@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
+	"math/rand"
+	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 )
@@ -22,6 +24,7 @@ func Register(name, password string) (string, int64, error) {
 	userinfo := dao.UserInfo{
 		UserLoginInfo: &userLogin,
 		Name:          name,
+		Avatar:        GetRandomAvatar(),
 	}
 
 	// 生成token
@@ -50,4 +53,11 @@ func RegisterCheck(name string) error {
 	}
 
 	return nil
+}
+
+func GetRandomAvatar() string {
+	//生成一个[1,8]的随机数
+	randNum := rand.Intn(9)
+	path := fmt.Sprintf("http://%v:%v/%v/%v.jpg", configs.LAN_IP, configs.GIN_PORT, configs.AVATAR_SAVE_PATH, randNum)
+	return path
 }
