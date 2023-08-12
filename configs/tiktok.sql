@@ -35,7 +35,6 @@ CREATE TABLE `user_infos` (
   `follow_count` bigint DEFAULT NULL  COMMENT '关注数',
   `follower_count` bigint DEFAULT NULL COMMENT '粉丝数',
   `is_follow` tinyint(1) DEFAULT NULL COMMENT '是否关注',
-  `total_favorited` bigint DEFAULT NULL COMMENT '获得的点赞数',
   `avatar` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '头像地址',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -80,5 +79,16 @@ CREATE TABLE `videos` (
   KEY `fk_user_infos_videos` (`user_info_id`),
   CONSTRAINT `fk_user_infos_videos` FOREIGN KEY (`user_info_id`) REFERENCES `user_infos` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
+-- chat_records: table
+CREATE TABLE `chat_records` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
+  `user_id` bigint NOT NULL COMMENT '用户id',
+  `target_id` bigint NOT NULL COMMENT '目标用户id',
+  `content` text COMMENT '聊天内容',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '聊天时间',
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_target_id` (`target_id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
