@@ -43,11 +43,8 @@ func FavoriteActCheck(userId, videoId, act int64) error {
 func ActFav(userId, videoId int64) error {
 	user := &dao.UserInfo{ID: userId}
 	//视频的点赞数+1
-	if err := (user).ToFavoriteVideo(&dao.Video{ID: videoId}); err != nil {
-		return err
-	}
 	//视频作者的获赞数+1
-	if err := (user).PlusFavCount(); err != nil {
+	if err := (user).ToFavoriteVideo(&dao.Video{ID: videoId}); err != nil {
 		return err
 	}
 	return nil
@@ -55,11 +52,8 @@ func ActFav(userId, videoId int64) error {
 func ActUnFav(userId, videoIs int64) error {
 	user := &dao.UserInfo{ID: userId}
 	//视频的点赞数-1
-	if err := (user).ToCancelFavorite(&dao.Video{ID: videoIs}); err != nil {
-		return err
-	}
 	//视频作者的获赞数-1
-	if err := (user).MinusFavCount(); err != nil {
+	if err := (user).ToCancelFavorite(&dao.Video{ID: videoIs}); err != nil {
 		return err
 	}
 	return nil

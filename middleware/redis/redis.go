@@ -63,3 +63,18 @@ func (r *Redis) GetUserFavoriteCount(uid int64) int64 {
 	count := rdb.SCard(ctx, key).Val()
 	return count
 }
+
+func (r *Redis) UpdateUserReceivedLikeCount(uid int64, state bool) {
+	key := fmt.Sprintf("liked:%d", uid)
+	if state {
+		rdb.IncrBy(ctx, key, 1)
+	} else {
+		rdb.DecrBy(ctx, key, 1)
+	}
+}
+
+func (r *Redis) GetUserReceivedLikeCount(uid int64) int64 {
+	key := fmt.Sprintf("liked:%d", uid)
+	count, _ := rdb.Get(ctx, key).Int64()
+	return count
+}
