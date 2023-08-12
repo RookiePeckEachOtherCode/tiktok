@@ -86,9 +86,9 @@ CREATE TABLE `chat_records` (
   `target_id` bigint NOT NULL COMMENT '目标用户id',
   `content` text COMMENT '聊天内容',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '聊天时间',
-  
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
-  KEY `idx_target_id` (`target_id`) 
+  KEY `idx_target_id` (`target_id`),
+  CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_infos`(`id`),
+  CONSTRAINT `fk_target_id` FOREIGN KEY (`target_id`) REFERENCES `user_infos`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-

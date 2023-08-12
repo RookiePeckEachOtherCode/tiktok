@@ -9,17 +9,17 @@ import (
 )
 
 type UserInfo struct {
-	ID             int64       `json:"id" gorm:"id,omitempty"`                           //用户id
-	Name           string      `json:"name" gorm:"name,omitempty"`                       //用户名称
-	FollowCount    int64       `json:"follow_count" gorm:"follow_count,omitempty"`       //关注数
-	FollowerCount  int64       `json:"follower_count" gorm:"follower_count,omitempty"`   //粉丝总数
-	IsFollow       bool        `json:"is_follow" gorm:"is_follow,omitempty"`             //当前登录用户是否关注该用户,true-已关注,false-未关注
-	UserLoginInfo  *UserLogin  `json:"-"`                                                //用户与登录信息的一对一
-	Videos         []*Video    `json:"-"`                                                //用户与视频的一对多
-	Follows        []*UserInfo `json:"-" gorm:"many2many:user_relations;"`               //用户与关注用户之间的多对多
-	FavorVideos    []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`            //用户与喜欢视频之间的多对多
-	Comments       []*Comment  `json:"-"`                                                //用户与评论的一对多
-	TotalFavorited int64       `json:"total_favorited" gorm:"total_favorited,omitempty"` //用户获赞数
+	ID             int64       `json:"id" gorm:"id,omitempty"`                         //用户id
+	Name           string      `json:"name" gorm:"name,omitempty"`                     //用户名称
+	FollowCount    int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
+	FollowerCount  int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
+	IsFollow       bool        `json:"is_follow" gorm:"is_follow,omitempty"`           //当前登录用户是否关注该用户,true-已关注,false-未关注
+	UserLoginInfo  *UserLogin  `json:"-"`                                              //用户与登录信息的一对一
+	Videos         []*Video    `json:"-"`                                              //用户与视频的一对多
+	Follows        []*UserInfo `json:"-" gorm:"many2many:user_relations;"`             //用户与关注用户之间的多对多
+	FavorVideos    []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`          //用户与喜欢视频之间的多对多
+	Comments       []*Comment  `json:"-"`                                              //用户与评论的一对多
+	TotalFavorited int64       `json:"total_favorited" gorm:"-"`                       //用户获赞数
 	WorkCount      int64       `json:"work_count" gorm:"-"`
 	Avatar         string      `json:"avatar" gorm:"avatar,omitempty"`
 	FavoriteCount  int64       `json:"favorite_count" gorm:"-"` //用户喜欢的视频数
@@ -33,6 +33,8 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 		return nil, errors.New("用户不存在")
 	}
 	userInfo.FavoriteCount = redis.New().GetUserFavoriteCount(userId)
+	userInfo.TotalFavorited = redis.New().GetUserReceivedLikeCount(userId)
+	userInfo.TotalFavorited = redis.New().GetUserFavoriteCount(userId)
 	return &userInfo, nil
 }
 
@@ -81,6 +83,7 @@ func (u *UserInfo) ToFavoriteVideo(video *Video) error {
 	}
 	if redis.IsInit {
 		redis.New().UpdateFavoriteState(u.ID, video.ID, true)
+		redis.New().UpdateUserReceivedLikeCount(video.UserInfoID, true)
 	}
 	return tx.Commit().Error
 }
@@ -101,6 +104,7 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	}
 	if redis.IsInit {
 		redis.New().UpdateFavoriteState(u.ID, video.ID, false)
+		redis.New().UpdateUserReceivedLikeCount(video.UserInfoID, false)
 	}
 	return tx.Commit().Error
 }
@@ -118,29 +122,24 @@ func GetFavList(userId int64) ([]*Video, error) {
 
 // 用户获赞数+1
 func (u *UserInfo) PlusFavCount() error {
-
 	tx := DB.Begin()
-
 	if err := tx.Model(u).UpdateColumn("total_favorited", gorm.Expr("total_favorited + 1")).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
-
+	redis.New().UpdateUserReceivedLikeCount(u.ID, true)
 	return tx.Commit().Error
 }
 
 // 用户获赞数-1
 func (u *UserInfo) MinusFavCount() error {
-
 	tx := DB.Begin()
-
 	if err := tx.Model(u).Where("total_favorited > 0").UpdateColumn("total_favorited", gorm.Expr("total_favorited - 1")).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
-
+	redis.New().UpdateUserReceivedLikeCount(u.ID, false)
 	return tx.Commit().Error
-
 }
 
 // 发布评论
