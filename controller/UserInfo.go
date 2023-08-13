@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"tiktok/dao"
@@ -26,7 +27,7 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	UserId, okk := _userid.(int64)
+	USerId, okk := _userid.(int64)
 	if !okk {
 		log.Println("断言失败")
 		c.JSON(http.StatusOK, model.Response{
@@ -35,7 +36,7 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	UserInfo, err := dao.GetUserInfoById(UserId)
+	USerInfo, err := dao.GetUserInfoById(USerId)
 	if err != nil {
 		log.Println("用户信息获取失败")
 		c.JSON(http.StatusOK, model.Response{
@@ -45,11 +46,12 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 
+	util.PrintLog(fmt.Sprintf("user_name: %v, user_id: %v,favorite_count:%v,have_favorite_count:%v,work_count:%v", USerInfo.Name, USerInfo.ID, USerInfo.TotalFavorited, USerInfo.TotalFavorited, USerInfo.WorkCount))
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		Response: model.Response{
 			StatusCode: 0,
 			StatusMsg:  "用户信息获取成功",
 		},
-		USerInfo: *UserInfo,
+		USerInfo: *USerInfo,
 	})
 }

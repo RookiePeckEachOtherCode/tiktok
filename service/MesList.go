@@ -28,15 +28,15 @@ func HandleMesList(uid int64, tid int64) (*MesListRes, error) {
 	for i, record := range *list {
 		messageList[i] = Message{
 			ID:         record.ID,
-			ToUserID:   record.TargetInfo.ID,
-			FromUserID: record.UserInfo.ID,
+			ToUserID:   record.TargetID,
+			FromUserID: record.UserID,
 			Content:    record.Content,
 			CreateTime: record.CreatedAt.Unix(),
 		}
 	}
 
 	res := &MesListRes{
-		StatusCode:  "200",
+		StatusCode:  "0",
 		StatusMsg:   "成功",
 		MessageList: messageList,
 	}
