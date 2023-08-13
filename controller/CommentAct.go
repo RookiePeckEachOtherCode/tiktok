@@ -80,46 +80,4 @@ func CommentAct(c *gin.Context) {
 		})
 	}
 
-	// if err1 != nil {
-	// 	c.JSON(http.StatusOK, model.Response{
-	// 		StatusCode: 0,
-	// 		StatusMsg:  "获取act失败",
-	// 	})
-	// }
-	// if Actiontype == 1 {
-	// 	Commenttext := c.Query("comment_text")
-	// 	comment = &dao.Comment{UserInfoID: userid, VideoID: Videoid, User: *user, Content: Commenttext}
-	// 	err2 := service.OperateComment(Videoid, userid, Actiontype, Commenttext, comment)
-	// 	if err2 != nil {
-	// 		c.JSON(http.StatusOK, model.Response{
-	// 			StatusCode: 1,
-	// 			StatusMsg:  "评论发布失败",
-	// 		})
-	// 		fmt.Printf("%v", err2)
-	// 		return
-	// 	}
-	// 	comment.CreatedDate = comment.CreatedAt.Format("01-02")
-
-	// 	c.JSON(http.StatusOK, CommentActResponse{
-	// 		Response: model.Response{
-	// 			StatusCode: 0,
-	// 			StatusMsg:  "发布评论成功",
-	// 		},
-	// 		Comment: *comment,
-	// 	})
-	// } else {
-	// 	Commentid := c.Query("comment_id")
-	// 	err3 := service.OperateComment(Videoid, userid, Actiontype, Commentid, comment)
-	// 	if err3 != nil {
-	// 		c.JSON(http.StatusOK, model.Response{
-	// 			StatusCode: 1,
-	// 			StatusMsg:  "删除评论失败",
-	// 		})
-	// 		return
-	// 	}
-	// 	c.JSON(http.StatusOK, model.Response{
-	// 		StatusCode: 0,
-	// 		StatusMsg:  "删除评论成功",
-	// 	})
-	// }
 }

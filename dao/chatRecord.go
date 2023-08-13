@@ -20,7 +20,7 @@ func CreateMes(uid int64, tid int64, mes string) error {
 	}
 	tuserinfo, err := GetUserInfoById(tid)
 	if err != nil {
-		errors.New("对方信息获取失败")
+		return errors.New("对方信息获取失败")
 	}
 	Mes := ChatRecord{
 		Content:    mes,

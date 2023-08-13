@@ -32,11 +32,7 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		if err != nil {
 			continue
 		}
-		if redis.IsInit {
-			userInfo.IsFollow = redis.New().GetUserRelation(userId, userInfo.ID)
-		} else {
-			userInfo.IsFollow = dao.GetUserRelation(userId, userInfo.ID)
-		}
+		userInfo.IsFollow = redis.New().GetUserRelation(userId, userInfo.ID)
 		(*videos)[i].Author = *userInfo
 		if userId > 0 {
 			if redis.IsInit {

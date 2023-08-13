@@ -237,26 +237,12 @@ func GetFloList(uid int64) ([]*UserInfo, error) {
 	}
 }
 
-// 根据用户id获取用户关注者列表
-func GetFollowerListById(userId int64) ([]*UserInfo, error) {
-	tx := DB.Begin()
-
-	var userInfo UserInfo
-	var userList []*UserInfo
-
-	if err := tx.Preload("Follows").First(&userInfo, userId).Error; err != nil {
-		tx.Rollback()
+func GetFollowerList(uid int64) ([]*UserInfo, error) {
+	var follower []*UserInfo
+	if err := DB.Model(&UserInfo{}).Where("id in (select user_info_id from user_relations where follow_id = ?)", uid).Find(&follower).Error; err != nil {
 		return nil, err
 	}
-
-	if err := tx.Model(&userInfo).Association("Follows").Find(&userList); err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	tx.Commit()
-	return userList, nil
-
+	return follower, nil
 }
 
 // GetUserRelation 判断两个用户之间是否存在关注关系
