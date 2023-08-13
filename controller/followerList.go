@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"tiktok/dao"
 	"tiktok/model"
 	"tiktok/service"
@@ -17,15 +18,17 @@ type GetFollowerListResponse struct {
 }
 
 func GetFollowerList(c *gin.Context) {
-	_userId, _ := c.Get("user_id")
-	userId, ok := _userId.(int64)
-	if !ok {
+	_userId := c.Query("user_id")
+	userId, err := strconv.ParseInt(_userId, 10, 64)
+	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
 			StatusMsg:  "用户id解析失败",
 		})
 		return
 	}
+
+	util.PrintLog(fmt.Sprintf("user_id:%v", userId))
 
 	userList, err := service.GetFollowerList(userId)
 

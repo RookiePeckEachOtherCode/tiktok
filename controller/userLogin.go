@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Gets struct {
-	Response model.Response
-	Token    *string `json:"token"`   // 用户鉴权token
-	UserID   *int64  `json:"user_id"` // 用户id
+type UserLoginResponse struct {
+	model.Response
+	Token  *string `json:"token"`   // 用户鉴权token
+	UserID *int64  `json:"user_id"` // 用户id
 }
 
 func UserLogin(c *gin.Context) { //处理登录请求
@@ -36,13 +36,13 @@ func UserLogin(c *gin.Context) { //处理登录请求
 		return
 	}
 
-	c.JSON(http.StatusOK, Gets{
-		Response: model.Response{
+	c.JSON(http.StatusOK, UserLoginResponse{
+		model.Response{
 			StatusCode: 0,
-			StatusMsg:  "登录成功",
+			StatusMsg:  "success",
 		},
-		Token:  &token,
-		UserID: &userID,
+		&token,
+		&userID,
 	})
 
 }
