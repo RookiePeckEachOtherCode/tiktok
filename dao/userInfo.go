@@ -28,7 +28,7 @@ type UserInfo struct {
 // GetUserInfoById 根据用户id获取用户信息
 func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
-	DB.Model(&UserInfo{}).Where("id=?", userId).First(&userInfo)
+	DB.Where("id=?", userId).First(&userInfo)
 	if userInfo.ID == 0 {
 		return nil, errors.New("用户不存在")
 	}
@@ -161,7 +161,6 @@ func (u *UserInfo) PostComment(text string, video *Video, comment *Comment) erro
 
 }
 
-// 删除评论
 func (u *UserInfo) DeleteComment(commentId string) error {
 	// 开启事务
 	tx := DB.Begin()
@@ -169,7 +168,7 @@ func (u *UserInfo) DeleteComment(commentId string) error {
 	var comment Comment
 	tx.First(&comment, commentId)
 	// 评论数-1
-	if err := tx.Model(&Video{ID: comment.ID}).Where("comment_count>0").UpdateColumn("comment_count", gorm.Expr("comment_count - ?", 1)).Error; err != nil {
+	if err := tx.Model(&Video{}).Where("id = ? AND comment_count > 0", comment.VideoID).UpdateColumn("comment_count", gorm.Expr("comment_count - 1")).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

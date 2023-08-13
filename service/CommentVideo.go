@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"tiktok/dao"
 )
 
@@ -14,13 +13,6 @@ func PostComment(vid, uid int64, context string) (*dao.Comment, error) {
 	if err := comment.PostComment(); err != nil {
 		return nil, err
 	}
-	user, err := dao.GetUserInfoById(uid)
-
-	if err != nil {
-		log.Println("获取用户信息失败", err)
-	}
-	comment.User = *user
-
 	return comment, nil
 }
 
