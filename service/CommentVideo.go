@@ -13,6 +13,8 @@ func PostComment(vid, uid int64, context string) (*dao.Comment, error) {
 	if err := comment.PostComment(); err != nil {
 		return nil, err
 	}
+	user, _ := dao.GetUserInfoById(uid)
+	comment.User = *user
 	return comment, nil
 }
 
