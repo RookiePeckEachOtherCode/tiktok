@@ -47,5 +47,8 @@ func Init() *gin.Engine {
 	apiGroup.POST("/message/action/", jwt.Auth(), controller.SentMes)
 	//注册消息列表路由
 	apiGroup.GET("/message/chat/", jwt.Auth(), controller.MesList)
+	//注册好友列表路由
+	apiGroup.GET("/relation/friend/list/", jwt.Auth(), controller.GetFriendList)
+
 	return r
 }

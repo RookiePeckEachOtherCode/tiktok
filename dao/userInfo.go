@@ -252,3 +252,26 @@ func GetUserRelation(uid, tid int64) bool { //uid是否关注tid
 	count := tx.Model(&userInfo).Where("id=?", tid).Association("Follows").Count()
 	return count > 0
 }
+func GetMutualFriendListById(userId int64) ([]*UserInfo, error) {
+	var mutualFriendList []int64
+	var Friends []*UserInfo
+
+	if err := DB.Raw("SELECT a.follow_id FROM user_relations a JOIN user_relations b ON a.user_info_id = b.follow_id AND a.follow_id = b.user_info_id WHERE a.user_info_id = ?", userId).Scan(&mutualFriendList).Error; err != nil {
+		return nil, err
+	}
+
+	for _, id := range mutualFriendList {
+		userInfo, err := GetUserInfoById(id)
+		if err != nil {
+			continue //忽略错误
+		}
+		Friends = append(Friends, userInfo)
+	}
+	if len(Friends) == 0 {
+		return nil, errors.New("没有共同好友")
+	}
+	if len(Friends) < len(mutualFriendList) {
+		return Friends, errors.New("部分好友不存在")
+	}
+	return Friends, nil
+}

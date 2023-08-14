@@ -60,6 +60,8 @@ func New(num int) *Redis {
 	}
 }
 
+// Favorite
+// ==================================================================================================
 func (r *Redis) UpdateFavoriteState(uid, vid int64, state bool) {
 	key := fmt.Sprintf("%s:%d", "favorite", uid)
 	if state {
@@ -81,6 +83,8 @@ func (r *Redis) GetUserFavoriteCount(uid int64) int64 {
 	return count
 }
 
+// Relation
+// ==================================================================================================
 func (r *Redis) UpdateUserRelation(userId int64, followId int64, state bool) {
 	key := fmt.Sprintf("%s:%d", "relation", userId)
 	if state {
@@ -96,6 +100,8 @@ func (r *Redis) GetUserRelation(userId int64, tid int64) bool {
 	return ret.Val()
 }
 
+// Liked
+// ==================================================================================================
 func (r *Redis) UpdateUserReceivedLikeCount(uid int64, state bool) {
 	key := fmt.Sprintf("liked:%d", uid)
 	if state {
