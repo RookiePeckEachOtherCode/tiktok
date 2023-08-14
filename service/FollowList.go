@@ -16,7 +16,10 @@ func HandleFollowList(uid int64) (*FollowListres, error) {
 		return nil, err
 	}
 	res := &FollowListres{
-		Response: model.Response{},
+		Response: model.Response{
+			StatusCode: 0,
+			StatusMsg:  "success",
+		},
 		UserList: list,
 	}
 	return res, nil
