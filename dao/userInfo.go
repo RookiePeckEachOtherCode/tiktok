@@ -32,9 +32,8 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	if userInfo.ID == 0 {
 		return nil, errors.New("用户不存在")
 	}
-	userInfo.FavoriteCount = redis.New().GetUserFavoriteCount(userId)
-	userInfo.TotalFavorited = redis.New().GetUserReceivedLikeCount(userId)
-	userInfo.TotalFavorited = redis.New().GetUserFavoriteCount(userId)
+	userInfo.FavoriteCount = redis.New(redis.FAVORITE).GetUserFavoriteCount(userId)
+	userInfo.TotalFavorited = redis.New(redis.LIKED).GetUserReceivedLikeCount(userId)
 	return &userInfo, nil
 }
 
@@ -81,10 +80,9 @@ func (u *UserInfo) ToFavoriteVideo(video *Video) error {
 		tx.Rollback()
 		return err
 	}
-	if redis.IsInit {
-		redis.New().UpdateFavoriteState(u.ID, video.ID, true)
-		redis.New().UpdateUserReceivedLikeCount(video.UserInfoID, true)
-	}
+	redis.New(redis.FAVORITE).UpdateFavoriteState(u.ID, video.ID, true)
+	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(video.UserInfoID, true)
+
 	return tx.Commit().Error
 }
 
@@ -102,10 +100,8 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 		tx.Rollback()
 		return err
 	}
-	if redis.IsInit {
-		redis.New().UpdateFavoriteState(u.ID, video.ID, false)
-		redis.New().UpdateUserReceivedLikeCount(video.UserInfoID, false)
-	}
+	redis.New(redis.FAVORITE).UpdateFavoriteState(u.ID, video.ID, false)
+	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(video.UserInfoID, false)
 	return tx.Commit().Error
 }
 
@@ -127,7 +123,7 @@ func (u *UserInfo) PlusFavCount() error {
 		tx.Rollback()
 		return err
 	}
-	redis.New().UpdateUserReceivedLikeCount(u.ID, true)
+	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(u.ID, true)
 	return tx.Commit().Error
 }
 
@@ -138,7 +134,7 @@ func (u *UserInfo) MinusFavCount() error {
 		tx.Rollback()
 		return err
 	}
-	redis.New().UpdateUserReceivedLikeCount(u.ID, false)
+	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(u.ID, false)
 	return tx.Commit().Error
 }
 

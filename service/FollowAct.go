@@ -23,7 +23,7 @@ func HandleFollowAct(act int64, tid int64, uid int64) error {
 			if err := (&dao.UserInfo{ID: uid}).FollowAct(&dao.UserInfo{ID: tid}); err != nil {
 				return err
 			}
-			redis.New().UpdateUserRelation(uid, tid, true)
+			redis.New(redis.RELATION).UpdateUserRelation(uid, tid, true)
 			return nil
 		} else {
 			log.Println("当前用户已关注")
@@ -35,7 +35,7 @@ func HandleFollowAct(act int64, tid int64, uid int64) error {
 			log.Println("取消关注失败")
 			return err
 		}
-		redis.New().UpdateUserRelation(uid, tid, false)
+		redis.New(redis.RELATION).UpdateUserRelation(uid, tid, false)
 		return nil
 	} else {
 		return errors.New("非法操作")

@@ -19,11 +19,7 @@ func GetPublishList(userId int64) (*[]dao.Video, error) {
 	util.PrintLog(fmt.Sprintf("调用了service的获取发布列表函数，userId:%d", userId))
 	for i := range *videos {
 		(*videos)[i].Author = *userInfo
-		if redis.IsInit {
-			(*videos)[i].IsFavorite = redis.New().GetFavoriteState(userId, (*videos)[i].ID)
-		} else {
-			(*videos)[i].IsFavorite = userInfo.GetIsFavorite((*videos)[i].ID)
-		}
+		(*videos)[i].IsFavorite = redis.New(redis.FAVORITE).GetFavoriteState(userId, (*videos)[i].ID)
 	}
 	return videos, nil
 }

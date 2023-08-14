@@ -32,15 +32,10 @@ func UpdateVideoInfo(userId int64, videos *[]*dao.Video) (*time.Time, error) {
 		if err != nil {
 			continue
 		}
-		userInfo.IsFollow = redis.New().GetUserRelation(userId, userInfo.ID)
+		userInfo.IsFollow = redis.New(redis.RELATION).GetUserRelation(userId, userInfo.ID)
 		(*videos)[i].Author = *userInfo
 		if userId > 0 {
-			if redis.IsInit {
-				(*videos)[i].IsFavorite = redis.New().GetFavoriteState(userId, (*videos)[i].ID)
-			} else {
-				_user := dao.UserInfo{ID: userId}
-				(*videos)[i].IsFavorite = _user.GetIsFavorite((*videos)[i].ID)
-			}
+			(*videos)[i].IsFavorite = redis.New(redis.FAVORITE).GetFavoriteState(userId, (*videos)[i].ID)
 		}
 	}
 	return &latestTime, nil

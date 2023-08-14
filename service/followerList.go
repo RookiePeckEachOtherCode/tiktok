@@ -18,7 +18,7 @@ func GetFollowerList(userId int64) ([]*dao.UserInfo, error) {
 	}
 
 	for _, v := range userList {
-		v.IsFollow = redis.New().GetUserRelation(userId, v.ID)
+		v.IsFollow = redis.New(redis.RELATION).GetUserRelation(userId, v.ID)
 	}
 
 	return userList, nil
