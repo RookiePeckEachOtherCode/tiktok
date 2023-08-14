@@ -10,8 +10,9 @@ const GIN_IP = "127.0.0.1"
 // 本机局域网ip
 // 注释掉就行了，不用删掉 [手动滑稽]
 // const LAN_IP = "localhost"
-// const LAN_IP = "192.168.31.181"
-const LAN_IP = "192.168.1.6"
+const LAN_IP = "192.168.31.181"
+
+// const LAN_IP = "192.168.1.6"
 const GIN_PORT = 8080
 
 // SIGN_KEY 是用于签名的密钥
@@ -22,11 +23,11 @@ const MAX_VIDEO_CNT = 30
 
 // mysql的连接信息
 const (
-	DB_USER = "root" // 数据库用户名
-	//DB_PASSWD = "123456" // 数据库密码
-	DB_PASSWD = "db22455"   //数据库密码
-	DB_URL    = "127.0.0.1" // 数据库地址
-	PORT      = "3306"      // 数据库端口
+	DB_USER   = "root"   // 数据库用户名
+	DB_PASSWD = "123456" // 数据库密码
+	//DB_PASSWD = "db22455"   //数据库密码
+	DB_URL = "127.0.0.1" // 数据库地址
+	PORT   = "3306"      // 数据库端口
 	//DB_NAME   = "dicktok"   //数据库名称
 	DB_NAME = "tiktok" //数据库名称
 )
