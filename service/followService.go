@@ -7,7 +7,12 @@ import (
 	"tiktok/middleware/redis"
 )
 
-func HandleFollowAct(act int64, tid int64, uid int64) error {
+type FollowerResponse struct {
+	dao.Response
+	UserList []*dao.UserInfo `json:"user_list"`
+}
+
+func FollowActionService(act int64, tid int64, uid int64) error {
 
 	if !dao.CheckIsExistByID(tid) {
 		log.Println("用户不存在")
@@ -40,4 +45,37 @@ func HandleFollowAct(act int64, tid int64, uid int64) error {
 	} else {
 		return errors.New("非法操作")
 	}
+}
+
+func FollowListService(uid int64) (*FollowerResponse, error) {
+	list, err := dao.GetFloList(uid)
+	if err != nil {
+		return nil, err
+	}
+	res := &FollowerResponse{
+		Response: dao.Response{
+			StatusCode: 0,
+			StatusMsg:  "success",
+		},
+		UserList: list,
+	}
+	return res, nil
+}
+
+func FollowerListService(userId int64) ([]*dao.UserInfo, error) {
+	if !dao.CheckIsExistByID(userId) {
+		return nil, errors.New("该用户不存在")
+	}
+
+	userList, err := dao.GetFollowerList(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range userList {
+		v.IsFollow = redis.New(redis.RELATION).GetUserRelation(userId, v.ID)
+	}
+
+	return userList, nil
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"tiktok/configs"
-	"tiktok/model"
+	"tiktok/dao"
 	"tiktok/util"
 	"time"
 
@@ -66,7 +66,7 @@ func Auth() gin.HandlerFunc {
 		if len(tokenStr) == 0 {
 			util.PrintLog("token为空")
 			util.PrintLog(fmt.Sprintf("token is %v", tokenStr))
-			c.JSON(http.StatusUnauthorized, model.Response{
+			c.JSON(http.StatusUnauthorized, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "unauthorized: 用户不存在或者未登录",
 			})
@@ -78,7 +78,7 @@ func Auth() gin.HandlerFunc {
 		// 如果token无效
 		if !ok {
 			util.PrintLog("token无效")
-			c.JSON(http.StatusForbidden, model.Response{
+			c.JSON(http.StatusForbidden, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "forbidden: token无效",
 			})
@@ -89,7 +89,7 @@ func Auth() gin.HandlerFunc {
 		// 如果token过期
 		if time.Now().Unix() > token.ExpiresAt {
 			util.PrintLog("token已过期")
-			c.JSON(http.StatusOK, model.Response{
+			c.JSON(http.StatusOK, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "token已过期",
 			})

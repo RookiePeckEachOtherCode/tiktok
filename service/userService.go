@@ -9,10 +9,33 @@ import (
 	"tiktok/middleware/jwt"
 )
 
-// Register 注册
-func Register(name, password string) (string, int64, error) {
+type UserInfoResponse struct {
+	Response dao.Response // 用户鉴权token
+	USerInfo dao.UserInfo `json:"user_info"` // 用户id
+}
 
-	if err := RegisterCheck(name); err != nil {
+func UserLoginService(userName, password string) (string, int64, error) {
+	if err := userLoginCheck(userName); err != nil {
+		return "", 0, err
+	}
+
+	userId, err := dao.JudgeUserPassword(userName, password)
+
+	if err != nil {
+		return "", 0, err
+	}
+
+	token, err := jwt.NewToken(userId)
+
+	if err != nil {
+		return "", 0, fmt.Errorf("生成token失败: %v", err)
+	}
+	return token, userId, nil
+}
+
+func UserRegisterService(name, password string) (string, int64, error) {
+
+	if err := registerCheck(name); err != nil {
 		return "", 0, err
 	}
 	// 保存用户登录信息
@@ -24,7 +47,7 @@ func Register(name, password string) (string, int64, error) {
 	userinfo := dao.UserInfo{
 		UserLoginInfo: &userLogin,
 		Name:          name,
-		Avatar:        GetRandomAvatar(),
+		Avatar:        getRandomAvatar(),
 	}
 
 	// 生成token
@@ -46,7 +69,14 @@ func Register(name, password string) (string, int64, error) {
 
 // Check 校验用户名和密码
 
-func RegisterCheck(name string) error {
+func userLoginCheck(name string) error {
+	if !dao.CheckIsExistByName(name) {
+		return errors.New("该用户不存在")
+	}
+	return nil
+}
+
+func registerCheck(name string) error {
 
 	if dao.IsExistUserLoginInfoByName(name) {
 		return errors.New("该用户名已被注册")
@@ -55,7 +85,7 @@ func RegisterCheck(name string) error {
 	return nil
 }
 
-func GetRandomAvatar() string {
+func getRandomAvatar() string {
 	//生成一个[1,8]的随机数
 	randNum := rand.Intn(9)
 	path := fmt.Sprintf("http://%v:%v/%v/%v.jpg", configs.LAN_IP, configs.GIN_PORT, configs.AVATAR_SAVE_PATH, randNum)

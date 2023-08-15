@@ -47,13 +47,6 @@ func GetVideoListByUserId(userId int64) (*[]Video, error) { //通过用户id查�
 
 	return &videoList, err
 }
-func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
-	var vd Video
-
-	err := DB.Where("id=?", vid).Find(&vd).Error
-
-	return &vd, err
-}
 
 // 通过视频id获取评论列表
 func GetCommentList(vid int64) ([]*Comment, error) {

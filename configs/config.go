@@ -4,14 +4,8 @@ import (
 	"fmt"
 )
 
-// gin的ip和端口
-const GIN_IP = "127.0.0.1"
-
-// 本机局域网ip
-// 注释掉就行了，不用删掉 [手动滑稽]
-// const LAN_IP = "localhost"
-// const LAN_IP = "192.168.31.181"
 const LAN_IP = "192.168.1.6"
+
 const GIN_PORT = 8080
 
 // SIGN_KEY 是用于签名的密钥
