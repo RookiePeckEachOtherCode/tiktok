@@ -1,56 +1,73 @@
 package dao
 
 import (
-	"errors"
+	"encoding/json"
+	"fmt"
+	"tiktok/middleware/redis"
 	"time"
 )
 
 type ChatRecord struct {
-	ID        int64     `json:"id" gorm:"primaryKey;column:id"`
-	UserID    int64     `json:"user_id" gorm:"column:user_id"`
-	TargetID  int64     `json:"target_id" gorm:"column:target_id"`
-	Content   string    `json:"content" gorm:"column:content"`
-	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
-	User      *UserInfo `json:"user,omitempty" gorm:"foreignkey:UserID"`
-	Target    *UserInfo `json:"target,omitempty" gorm:"foreignkey:TargetID"`
+	ID        int64  `json:"id" gorm:"primaryKey;column:id"`
+	Content   string `json:"content" gorm:"column:content"`
+	UserId    int64  `json:"from_user_id" gorm:"column:user_id"`
+	ToUserId  int64  `json:"to_user_id " gorm:"column:to_user_id"`
+	CreatedAt int64  `json:"created_at"  gorm:"column:created_at"`
 }
 
-func CreateMes(uid int64, tid int64, mes string) error {
-	userInfo, err := GetUserInfoById(uid)
-	if err != nil {
-		return errors.New("用户信息获取失败")
-	}
-	tuserinfo, err := GetUserInfoById(tid)
-	if err != nil {
-		return errors.New("对方信息获取失败")
-	}
-	Mes := ChatRecord{
-		Content:   mes,
-		CreatedAt: time.Now(),
-		UserID:    uid,
-		TargetID:  tid,
-		User:      userInfo,
-		Target:    tuserinfo,
-	}
-	tx := DB.Begin()
-	if err := tx.Model(&ChatRecord{}).Create(&Mes).Error; err != nil {
-		DB.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
-}
-func MesList(uid int64, tid int64) (*[]ChatRecord, error) {
-	tx := DB.Begin()
-
-	var records []ChatRecord
-	if err := tx.Where("user_id = ? AND target_id = ?", uid, tid).
-		Or("user_id = ? AND target_id = ?", tid, uid).
-		Find(&records).Error; err != nil {
-		tx.Rollback()
+func GetChatRecordList(userId, ToUserId int64) ([]ChatRecord, error) {
+	var messageList []ChatRecord
+	if err := DB.Where("user_id = ? AND to_user_id = ? ", userId, ToUserId).
+		Or("user_id = ? AND to_user_id = ?", ToUserId, userId).
+		Order("created_at asc").Find(&messageList).Error; err != nil {
 		return nil, err
 	}
+	return messageList, nil
+}
 
-	tx.Commit()
-	return &records, nil
+func NewMessage(userId, toUserId int64, content string) (int64, error) {
+	message := &ChatRecord{
+		UserId:    userId,
+		ToUserId:  toUserId,
+		Content:   content,
+		CreatedAt: time.Now().UnixMilli(),
+	}
+	if err := DB.Create(message).Error; err != nil {
+		return 0, err
+	}
+
+	return message.CreatedAt, nil
+}
+
+func AddMessageListInRedis(userId, toUserId int64, message []ChatRecord) error {
+	msgName := fmt.Sprintf("%d-%d", userId, toUserId)
+	for _, message := range message {
+		bytes, _ := json.Marshal(message)
+		err := redis.New(redis.MSGS).AddAllMessage(msgName, bytes, message.CreatedAt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ParesMessageListFromRedis(uerId, toUserId, msgTime int64) ([]ChatRecord, error) {
+	var messageList []ChatRecord
+	msgName := fmt.Sprintf("%d-%d", uerId, toUserId)
+	for {
+		bytes, err := redis.New(redis.MSGS).GetMessage(msgName)
+		if err != nil {
+			return nil, err
+		}
+		if bytes == "" {
+			break
+		}
+		message := ChatRecord{}
+		json.Unmarshal([]byte(bytes), &message)
+		if message.CreatedAt >= msgTime {
+			continue
+		}
+		messageList = append(messageList, message)
+	}
+	return messageList, nil
 }

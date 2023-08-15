@@ -83,12 +83,12 @@ CREATE TABLE `videos` (
 CREATE TABLE `chat_records` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
   `user_id` bigint NOT NULL COMMENT '用户id',
-  `target_id` bigint NOT NULL COMMENT '目标用户id',
+  `to_user_id` bigint NOT NULL COMMENT '目标用户id',
   `content` text COMMENT '聊天内容',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '聊天时间',
+  `created_at`  bigint  DEFAULT NULL COMMENT '时间戳',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
-  KEY `idx_target_id` (`target_id`),
+  KEY `idx_target_id` (`to_user_id`),
   CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_infos`(`id`),
-  CONSTRAINT `fk_target_id` FOREIGN KEY (`target_id`) REFERENCES `user_infos`(`id`)
+  CONSTRAINT `fk_to_user_id` FOREIGN KEY (`to_user_id`) REFERENCES `user_infos`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

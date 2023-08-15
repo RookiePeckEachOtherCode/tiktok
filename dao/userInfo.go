@@ -2,7 +2,9 @@ package dao
 
 import (
 	"errors"
+	"log"
 	"tiktok/middleware/redis"
+
 	"time"
 
 	"gorm.io/gorm"
@@ -23,6 +25,11 @@ type UserInfo struct {
 	WorkCount      int64       `json:"work_count" gorm:"-"`
 	Avatar         string      `json:"avatar" gorm:"avatar,omitempty"`
 	FavoriteCount  int64       `json:"favorite_count" gorm:"-"` //用户喜欢的视频数
+}
+type Friend struct {
+	UserInfo
+	Message string `json:"message"`  //消息
+	MsgType int8   `json:"msg_type"` //消息类型 message信息的类型，0=>请求用户接受信息，1=>当前请求用户发送的信息
 }
 
 // GetUserInfoById 根据用户id获取用户信息
@@ -274,4 +281,18 @@ func GetMutualFriendListById(userId int64) ([]*UserInfo, error) {
 		return Friends, errors.New("部分好友不存在")
 	}
 	return Friends, nil
+}
+
+func GetNewestMessageByUserIdAndToUserID(userId int64, toUserId int64) (string, int8, error) {
+	message := ChatRecord{}
+	result := DB.Where("user_id = ? AND to_user_id = ? ", userId, toUserId).Or("user_id = ? AND to_user_id = ? ", toUserId, userId).Order("created_at desc").Limit(1).Find(&message)
+	if result.Error != nil {
+		log.Println("查询最新消息失败", result.Error.Error())
+		return "", -1, result.Error
+	}
+	if userId == message.UserId {
+		return message.Content, 1, nil
+	} else {
+		return message.Content, 0, nil
+	}
 }

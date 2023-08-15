@@ -12,7 +12,7 @@ import (
 
 type FriendListResponse struct {
 	model.Response
-	UserList []*dao.UserInfo `json:"user_list"`
+	FriendList []*dao.Friend `json:"user_list"`
 }
 
 func GetFriendList(c *gin.Context) {
@@ -39,10 +39,10 @@ func GetFriendList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, FriendListResponse{
-		model.Response{
+		Response: model.Response{
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		userList,
+		FriendList: userList,
 	})
 }

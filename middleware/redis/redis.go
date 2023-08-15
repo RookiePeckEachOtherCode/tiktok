@@ -13,12 +13,14 @@ const (
 	FAVORITE = 1
 	RELATION = 2
 	LIKED    = 3
+	MSGS     = 4
 )
 
 var ctx = context.Background()
 var fav *redis.Client
 var relation *redis.Client
 var liked *redis.Client
+var msgs *redis.Client
 
 func Init() {
 	log.Println("REDIS INIT")
@@ -40,6 +42,25 @@ func Init() {
 			Password: "",
 			DB:       2,
 		})
+	msgs = redis.NewClient( //管理聊天的数据
+		&redis.Options{
+			Addr:     configs.GetRedisInfo(),
+			Password: "",
+			DB:       3,
+		})
+
+	if _, err := fav.Ping(ctx).Result(); err != nil {
+		log.Panicln("redis_fav init error")
+	}
+	if _, err := relation.Ping(ctx).Result(); err != nil {
+		log.Panicln("redis_relation init error")
+	}
+	if _, err := liked.Ping(ctx).Result(); err != nil {
+		log.Panicln("redis_liked init error")
+	}
+	if _, err := msgs.Ping(ctx).Result(); err != nil {
+		log.Panicln("redis_message init error")
+	}
 }
 
 type Redis struct {
@@ -54,6 +75,8 @@ func New(num int) *Redis {
 		return &Redis{relation}
 	case LIKED:
 		return &Redis{liked}
+	case MSGS:
+		return &Redis{msgs}
 	default:
 		log.Panicln("redis num error")
 		return nil
@@ -115,4 +138,21 @@ func (r *Redis) GetUserReceivedLikeCount(uid int64) int64 {
 	key := fmt.Sprintf("liked:%d", uid)
 	count, _ := r.Client.Get(ctx, key).Int64()
 	return count
+}
+
+// Msgs
+// ==================================================================================================
+func (r *Redis) NewMessage(msgName string, bytes []byte) error {
+	return r.Client.RPush(ctx, msgName, bytes).Err()
+}
+
+func (r *Redis) AddAllMessage(msgName string, bytes []byte, createTime int64) error {
+	return r.Client.ZAdd(ctx, msgName, &redis.Z{
+		Score:  float64(createTime),
+		Member: bytes,
+	}).Err()
+}
+
+func (r *Redis) GetMessage(msgName string) (string, error) {
+	return r.Client.LPop(ctx, msgName).Result()
 }
