@@ -60,7 +60,10 @@ func ParesMessageListFromRedis(uerId, toUserId, msgTime int64) ([]ChatRecord, er
 			break
 		}
 		message := ChatRecord{}
-		json.Unmarshal([]byte(bytes), &message)
+		err := json.Unmarshal([]byte(bytes), &message)
+		if err != nil {
+			return nil, err
+		}
 		// 如果消息时间大于等于传入的时间，说明是新消息，直接跳过
 		if message.CreatedTime >= msgTime {
 			continue
