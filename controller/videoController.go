@@ -119,9 +119,9 @@ func PublishVideoController(c *gin.Context) {
 		return
 	}
 
-	videoInfo := GetVideoInfo(data)
+	videoInfo := getVideoInfo(data)
 
-	if err := videoInfo.SaveVideo(c); err != nil {
+	if err := videoInfo.saveVideo(c); err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  fmt.Sprintf("视频保存失败: %s", err.Error()),
@@ -129,7 +129,7 @@ func PublishVideoController(c *gin.Context) {
 		log.Println("视频保存失败: ", err)
 		return
 	}
-	if err := videoInfo.SaveCover(); err != nil {
+	if err := videoInfo.saveCover(); err != nil {
 		log.Println("封面保存失败: ", err)
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
