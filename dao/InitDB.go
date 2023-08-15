@@ -20,7 +20,7 @@ func InitDb() {
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
 			SlowThreshold: time.Second,
-			LogLevel:      logger.Error,
+			LogLevel:      logger.Info,
 			Colorful:      true,
 		},
 	)
@@ -28,7 +28,9 @@ func InitDb() {
 	var err error
 	dsn := configs.GetDBInfo()
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: newLogger,
+		Logger:                 newLogger,
+		PrepareStmt:            true,
+		SkipDefaultTransaction: true,
 	})
 
 	if err != nil {

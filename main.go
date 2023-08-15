@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"tiktok/configs"
 	"tiktok/dao"
+	"tiktok/middleware/redis"
 	"tiktok/router"
 )
 
@@ -13,15 +15,17 @@ func main() {
 	// 初始化数据库
 	dao.InitDb()
 	// 初始化redis
-	//redis.Init()
+	redis.Init()
 	// 初始化路由
 	InitGin()
 
 }
 
-// 初始化数据库和路由
 func InitGin() {
 	r := router.Init()
 
-	r.Run(fmt.Sprintf(":%d", configs.GIN_PORT))
+	err := r.Run(fmt.Sprintf(":%d", configs.GIN_PORT))
+	if err != nil {
+		log.Panicln(err)
+	}
 }
