@@ -5,16 +5,14 @@ services:
     build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - mysql
-      - redis
     environment:
       DB_NAME: tiktok
       DB_PASS: db22455
       DB_USER: root
-    links:
+    depends_on:
       - mysql
       - redis
+    restart: on-failure:5
 
   mysql:
     image: mysql:latest
