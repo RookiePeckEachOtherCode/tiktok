@@ -59,54 +59,6 @@ func VideoFeedController(c *gin.Context) {
 		})
 	}
 }
-func hasLogin(c *gin.Context, token string) error {
-	if claims, ok := jwt.ParseToken(token); ok {
-		if claims.ExpiresAt < time.Now().Unix() {
-			return errors.New("登陆过期")
-		}
-		_latestTime := c.Query("latest_time")
-		var latestTime time.Time
-		intTime, err := strconv.ParseInt(_latestTime, 10, 64)
-		if err != nil {
-			latestTime = time.Unix(0, intTime*1e6)
-		}
-		videoList, err := service.VideoFeedService(claims.UserId, latestTime)
-		if err != nil {
-			return err
-		}
-		c.JSON(http.StatusOK, FeedResponse{
-			Response: dao.Response{
-				StatusCode: 0,
-				StatusMsg:  "success",
-			},
-			FeedVideoFlow: videoList,
-		})
-		return nil
-	}
-	return errors.New("token解析失败")
-}
-
-func notLogin(c *gin.Context) error {
-	_latestTime := c.Query("latest_time")
-	var latestTime time.Time
-	intTime, err := strconv.ParseInt(_latestTime, 10, 64)
-	if err == nil {
-		latestTime = time.Unix(0, intTime*1e6)
-	}
-	videoList, err := service.VideoFeedService(0, latestTime)
-	if err != nil {
-		return err
-	}
-	c.JSON(http.StatusOK, FeedResponse{
-		Response: dao.Response{
-			StatusCode: 0,
-			StatusMsg:  "success",
-		},
-		FeedVideoFlow: videoList,
-	})
-	return nil
-}
-
 func PublishListController(c *gin.Context) {
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
@@ -195,7 +147,55 @@ func PublishVideoController(c *gin.Context) {
 	})
 }
 
-func GetVideoInfo(file *multipart.FileHeader) *VideoInfos {
+func hasLogin(c *gin.Context, token string) error {
+	if claims, ok := jwt.ParseToken(token); ok {
+		if claims.ExpiresAt < time.Now().Unix() {
+			return errors.New("登陆过期")
+		}
+		_latestTime := c.Query("latest_time")
+		var latestTime time.Time
+		intTime, err := strconv.ParseInt(_latestTime, 10, 64)
+		if err != nil {
+			latestTime = time.Unix(0, intTime*1e6)
+		}
+		videoList, err := service.VideoFeedService(claims.UserId, latestTime)
+		if err != nil {
+			return err
+		}
+		c.JSON(http.StatusOK, FeedResponse{
+			Response: dao.Response{
+				StatusCode: 0,
+				StatusMsg:  "success",
+			},
+			FeedVideoFlow: videoList,
+		})
+		return nil
+	}
+	return errors.New("token解析失败")
+}
+
+func notLogin(c *gin.Context) error {
+	_latestTime := c.Query("latest_time")
+	var latestTime time.Time
+	intTime, err := strconv.ParseInt(_latestTime, 10, 64)
+	if err == nil {
+		latestTime = time.Unix(0, intTime*1e6)
+	}
+	videoList, err := service.VideoFeedService(0, latestTime)
+	if err != nil {
+		return err
+	}
+	c.JSON(http.StatusOK, FeedResponse{
+		Response: dao.Response{
+			StatusCode: 0,
+			StatusMsg:  "success",
+		},
+		FeedVideoFlow: videoList,
+	})
+	return nil
+}
+
+func getVideoInfo(file *multipart.FileHeader) *VideoInfos {
 	videoInfo := VideoInfos{}
 	videoInfo.VideoName = util.NewFileName(file.Filename)
 	videoInfo.CoverName = string([]byte(videoInfo.VideoName)[:len(videoInfo.VideoName)-len(filepath.Ext(videoInfo.VideoName))]) + ".jpg"
@@ -205,11 +205,11 @@ func GetVideoInfo(file *multipart.FileHeader) *VideoInfos {
 	return &videoInfo
 }
 
-func (v VideoInfos) SaveVideo(c *gin.Context) error {
+func (v VideoInfos) saveVideo(c *gin.Context) error {
 	return c.SaveUploadedFile(v.file, v.VideoSavePath)
 }
 
-func (v VideoInfos) SaveCover() error {
+func (v VideoInfos) saveCover() error {
 
 	coverDir := filepath.Dir(v.CoverSavePath)
 
@@ -225,7 +225,7 @@ func (v VideoInfos) SaveCover() error {
 	case "linux":
 		cmd = exec.Command("middleware/ffmpeg/ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
 	default:
-		cmd = exec.Command("middleware/ffmpeg/ffmpeg.exe", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
+		cmd = exec.Command("ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
 	}
 
 	// 改用 exec.Command 的正确用法
