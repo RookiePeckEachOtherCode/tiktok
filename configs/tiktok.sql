@@ -1,7 +1,5 @@
 SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
--- comments: table
+SET FOREIGN_KEY_CHECKS = 0; -- comments: table
 DROP TABLE IF EXISTS `comments`;
 CREATE TABLE `comments` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
@@ -85,7 +83,7 @@ CREATE TABLE `chat_records` (
   `user_id` bigint NOT NULL COMMENT '用户id',
   `to_user_id` bigint NOT NULL COMMENT '目标用户id',
   `content` text COMMENT '聊天内容',
-  `created_at`  bigint  DEFAULT NULL COMMENT '时间戳',
+  `created_time` bigint DEFAULT NULL COMMENT '时间戳',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_target_id` (`to_user_id`),

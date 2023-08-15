@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"tiktok/dao"
 )
 
@@ -16,13 +15,9 @@ func GetChatRecord(userId, toUserId int64, preMsgTime int64) ([]dao.ChatRecord, 
 		if err != nil {
 			return nil, fmt.Errorf("获取聊天记录失败: %w", err)
 		}
-		if err := dao.AddMessageListInRedis(userId, toUserId, messageList); err != nil {
-			log.Println("AddMessageListInRedis err:", err)
-			return nil, err
-		}
+		dao.AddMessageListInRedis(userId, toUserId, messageList)
 		return messageList, nil
 	}
-
 	messagelist, err := dao.ParesMessageListFromRedis(userId, toUserId, preMsgTime)
 	if err != nil {
 		return nil, err

@@ -142,15 +142,15 @@ func (r *Redis) GetUserReceivedLikeCount(uid int64) int64 {
 
 // Msgs
 // ==================================================================================================
-func (r *Redis) NewMessage(msgName string, bytes []byte) error {
-	return r.Client.RPush(ctx, msgName, bytes).Err()
+func (r *Redis) NewMessage(msgName string, bytes []byte) {
+	r.Client.RPush(ctx, msgName, bytes)
 }
 
-func (r *Redis) AddAllMessage(msgName string, bytes []byte, createTime int64) error {
-	return r.Client.ZAdd(ctx, msgName, &redis.Z{
+func (r *Redis) AddAllMessage(msgName string, bytes []byte, createTime int64) {
+	r.Client.ZAdd(ctx, msgName, &redis.Z{
 		Score:  float64(createTime),
 		Member: bytes,
-	}).Err()
+	})
 }
 
 func (r *Redis) GetMessage(msgName string) (string, error) {

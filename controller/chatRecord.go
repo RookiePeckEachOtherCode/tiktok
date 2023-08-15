@@ -46,18 +46,13 @@ func GetChatRecord(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "无效的时间戳",
 		})
+		return
 	}
-	//now   1692058913
-	//need  1692059113053
-	//nano  1692059223836730265
-	//micro 1692059223836745
-	//milli 1692059223836
-	//unix  1692059223
 
 	msgList, err := service.GetChatRecord(userId, toUserId, preMsgTime)
 
 	for _, v := range msgList {
-		util.PrintLog(fmt.Sprintf("content:%v created_at: %v", v.Content, v.CreatedAt))
+		util.PrintLog(fmt.Sprintln("msglist:", v))
 	}
 
 	if err != nil {
@@ -65,6 +60,7 @@ func GetChatRecord(c *gin.Context) {
 			StatusCode: 1,
 			StatusMsg:  "获取聊天记录失败" + err.Error(),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, ChatRecordResponse{

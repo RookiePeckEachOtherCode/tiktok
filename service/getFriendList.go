@@ -21,7 +21,7 @@ func GetFriendList(userId int64) ([]*dao.Friend, error) {
 		}
 
 		FriendList = append(FriendList, &dao.Friend{
-			UserInfo: *userInfo,
+			UserInfo: userInfo,
 			Message:  message,
 			MsgType:  msgType,
 		})
