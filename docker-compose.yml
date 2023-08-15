@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      DB_NAME: tiktok
+      DB_PASS: db22455
+      DB_USER: root
+    links:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: db22455
+      MYSQL_DATABASE: tiktok
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./configs/tiktok.sql:/docker-entrypoint-initdb.d/tiktok.sql
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - 6379:6379
+
+volumes:
+  mysql_data:
+  redis_data:

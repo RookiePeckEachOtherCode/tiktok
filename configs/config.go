@@ -16,13 +16,11 @@ const MAX_VIDEO_CNT = 30
 
 // mysql的连接信息
 const (
-	DB_USER = "root" // 数据库用户名
-	//DB_PASSWD = "123456" // 数据库密码
-	DB_PASSWD = "db22455"   //数据库密码
-	DB_URL    = "127.0.0.1" // 数据库地址
-	PORT      = "3306"      // 数据库端口
-	//DB_NAME   = "dicktok"   //数据库名称
-	DB_NAME = "tiktok" //数据库名称
+	DB_USER   = "root"    // 数据库用户名
+	DB_PASSWD = "db22455" //数据库密码
+	DB_URL    = "mysql"   // 数据库地址
+	PORT      = "3306"    // 数据库端口
+	DB_NAME   = "tiktok"  //数据库名称
 )
 
 // GetDBInfo 返回mysql的连接信息
@@ -48,7 +46,7 @@ const VIDEO_COVER_SAVE_PATH = "static/assets/cover"
 const AVATAR_SAVE_PATH = "static/assets/avatar"
 
 const (
-	REDIS_URL  = "127.0.0.1"
+	REDIS_URL  = "redis"
 	REDIS_PORT = "6379"
 )
 
