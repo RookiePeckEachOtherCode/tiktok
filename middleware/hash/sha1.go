@@ -3,11 +3,10 @@ package hash
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"tiktok/configs"
-	"tiktok/model"
-
-	"github.com/gin-gonic/gin"
+	"tiktok/dao"
 )
 
 // HashPassword 中间件 - 对密码进行SHA1哈希
@@ -57,7 +56,7 @@ func CheckUserName() gin.HandlerFunc {
 
 // 返回错误响应的统一处理
 func returnError(c *gin.Context, msg string) {
-	c.JSON(http.StatusOK, model.Response{
+	c.JSON(http.StatusOK, dao.Response{
 		StatusCode: 1,
 		StatusMsg:  msg,
 	})

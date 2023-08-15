@@ -24,12 +24,13 @@ type Video struct {
 }
 
 // GetVideoListByLastTime 根据上传时间获取视频列表
-func GetVideoListByLastTime(lastTime time.Time) ([]*Video, error) {
-	videos := make([]*Video, 0, configs.MAX_VIDEO_CNT)
-
-	err := DB.Model(&Video{}).Where("created_at<?", lastTime).Order("created_at ASC").Limit(configs.MAX_VIDEO_CNT).Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).Find(&videos).Error
-
-	return videos, err
+func GetVideoListByLastTime(lastTime time.Time) (*[]*Video, error) {
+	var videos []*Video
+	err := DB.Model(&Video{}).Where("created_at<?", lastTime).
+		Order("created_at DESC").Limit(configs.MAX_VIDEO_CNT).
+		Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).
+		Find(&videos).Error
+	return &videos, err
 }
 
 func NewVideo(v *Video) error { //上传视频
@@ -46,10 +47,13 @@ func GetVideoListByUserId(userId int64) (*[]Video, error) { //通过用户id查�
 
 	return &videoList, err
 }
-func FindVideoByVid(vid int64) (*Video, error) { //通过视频id查询视频
-	var vd Video
 
-	err := DB.Where("id=?", vid).Find(&vd).Error
+// 通过视频id获取评论列表
+func GetCommentList(vid int64) ([]*Comment, error) {
+	var comments []*Comment
 
-	return &vd, err
+	if err := DB.Model(&Comment{}).Where("video_id=?", vid).Find(&comments).Error; err != nil {
+		return nil, err
+	}
+	return comments, nil
 }

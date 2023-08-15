@@ -23,13 +23,6 @@ func JudgeUserPassword(name, password string) (int64, error) {
 	return userlogInfo.ID, nil
 }
 
-func GetUserLoginInfoByName(name string) (UserLogin, error) {
-	userLoginInfo := UserLogin{}
-	DB.Where("username=?", name).First(&userLoginInfo)
-
-	return userLoginInfo, nil
-}
-
 func IsExistUserLoginInfoByName(name string) bool {
 	var userLogin UserLogin
 	DB.Where("username=?", name).First(&userLogin)
