@@ -27,7 +27,7 @@ type UserInfo struct {
 	FavoriteCount  int64       `json:"favorite_count" gorm:"-"` //用户喜欢的视频数
 }
 type Friend struct {
-	*UserInfo
+	UserInfo
 	Message string `json:"message"` //消息
 	MsgType int8   `json:"msgType"` //消息类型 message信息的类型，0=>请求用户接受信息，1=>当前请求用户发送的信息
 }
@@ -283,7 +283,7 @@ func GetMutualFriendListById(userId int64) ([]*UserInfo, error) {
 	return Friends, nil
 }
 
-// GetNewestMessageByUserIdAndToUserID 获取最新消息 1=>当前用户发送的消息，0=>对方接受的消息
+// message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 func GetNewestMessageByUserIdAndToUserID(userId int64, toUserId int64) (string, int8, error) {
 	message := ChatRecord{}
 	result := DB.Where("user_id = ? AND to_user_id = ? ", userId, toUserId).
@@ -294,9 +294,16 @@ func GetNewestMessageByUserIdAndToUserID(userId int64, toUserId int64) (string, 
 		log.Println("查询最新消息失败", result.Error.Error())
 		return "", -1, result.Error
 	}
+	log.Println(`
+	
+	
+	==================================
+	`)
 	if userId == message.FromUserId {
+		log.Println("当前用户发送的消息", message.Content)
 		return message.Content, 1, nil
 	} else {
+		log.Println("当前用户接收的消息", message.Content)
 		return message.Content, 0, nil
 	}
 }

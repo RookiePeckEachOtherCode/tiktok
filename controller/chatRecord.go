@@ -14,7 +14,7 @@ import (
 
 type ChatRecordResponse struct {
 	model.Response
-	MsgList []dao.ChatRecord `json:"message_list"`
+	MessageList []dao.ChatRecord `json:"message_list"`
 }
 
 func GetChatRecord(c *gin.Context) {
@@ -30,6 +30,7 @@ func GetChatRecord(c *gin.Context) {
 
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
+
 	if !ok {
 		c.JSON(http.StatusOK, model.Response{
 			StatusCode: 1,
@@ -49,10 +50,10 @@ func GetChatRecord(c *gin.Context) {
 		return
 	}
 
-	msgList, err := service.GetChatRecord(userId, toUserId, preMsgTime)
+	messagelist, err := service.GetChatRecord(userId, toUserId, preMsgTime)
 
-	for _, v := range msgList {
-		util.PrintLog(fmt.Sprintln("msglist:", v))
+	for _, v := range messagelist {
+		util.PrintLog(fmt.Sprintln("from_user_id:", v.FromUserId, "to_user_id:", v.ToUserId, "content:", v.Content, "create_time:", v.CreatedTime))
 	}
 
 	if err != nil {
@@ -68,6 +69,6 @@ func GetChatRecord(c *gin.Context) {
 			StatusCode: 0,
 			StatusMsg:  "获取聊天记录成功",
 		},
-		MsgList: msgList,
+		MessageList: messagelist,
 	})
 }

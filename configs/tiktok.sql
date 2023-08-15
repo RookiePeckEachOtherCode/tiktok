@@ -78,6 +78,7 @@ CREATE TABLE `videos` (
   CONSTRAINT `fk_user_infos_videos` FOREIGN KEY (`user_info_id`) REFERENCES `user_infos` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- chat_records: table
+DROP TABLE IF EXISTS `chat_records`;
 CREATE TABLE `chat_records` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
   `user_id` bigint NOT NULL COMMENT '用户id',

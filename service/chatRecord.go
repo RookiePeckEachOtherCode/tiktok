@@ -18,10 +18,11 @@ func GetChatRecord(userId, toUserId int64, preMsgTime int64) ([]dao.ChatRecord, 
 		dao.AddMessageListInRedis(userId, toUserId, messageList)
 		return messageList, nil
 	}
+
 	messagelist, err := dao.ParesMessageListFromRedis(userId, toUserId, preMsgTime)
+
 	if err != nil {
 		return nil, err
 	}
-
 	return messagelist, nil
 }
