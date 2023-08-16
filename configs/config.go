@@ -2,6 +2,8 @@ package configs
 
 import (
 	"fmt"
+	"log"
+	"os"
 )
 
 const LAN_IP = "192.168.1.6"
@@ -76,4 +78,10 @@ func Bless() {
 	fmt.Println("")
 	fmt.Println(".............................................")
 	fmt.Println("          佛祖保佑             永无BUG")
+}
+
+func GetDictAbsPath() string {
+	path, _ := os.Getwd()
+	log.Println(path)
+	return path + "/configs/dict.txt"
 }

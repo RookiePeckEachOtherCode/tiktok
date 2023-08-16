@@ -1,7 +1,9 @@
 package service
 
 import (
+	"log"
 	"tiktok/dao"
+	"tiktok/util"
 )
 
 type CommentListResponse struct {
@@ -10,6 +12,13 @@ type CommentListResponse struct {
 }
 
 func PostCommentService(vid, uid int64, context string) (*dao.Comment, error) {
+	if ctx, err := util.FilterDirty(context); err != nil {
+		return nil, err
+	} else {
+		context = ctx
+	}
+
+	log.Println(context)
 	comment := &dao.Comment{
 		UserInfoID: uid,
 		VideoID:    vid,

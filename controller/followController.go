@@ -32,7 +32,7 @@ func FollowActionController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "对方id获取失败",
+			StatusMsg:  "对方id获取失败: " + err.Error(),
 		})
 	}
 	act, err := strconv.ParseInt(Act, 10, 64)
@@ -63,14 +63,14 @@ func FollowListController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "无法获取用户id",
+			StatusMsg:  "无法获取用户id: " + err.Error(),
 		})
 	}
 	followList, err := service.FollowListService(uid)
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "列表获取失败",
+			StatusMsg:  "列表获取失败: " + err.Error(),
 		})
 		fmt.Printf("%v\n", err)
 	} else {
@@ -84,7 +84,7 @@ func FollowerListController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "用户id解析失败",
+			StatusMsg:  "用户id解析失败: " + err.Error(),
 		})
 		return
 	}
@@ -97,7 +97,7 @@ func FollowerListController(c *gin.Context) {
 		util.PrintLog(fmt.Sprintf("获取关注列表失败，err:%v", err))
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
+			StatusMsg:  "获取关注列表失败: " + err.Error(),
 		})
 		return
 	}

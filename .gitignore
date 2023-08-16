@@ -1,6 +1,5 @@
 gormt
 config.yml
 .idea
-middleware/ffmpeg
 static/assets/cover
 static/assets/video

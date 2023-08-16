@@ -5,7 +5,9 @@ go 1.20
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/importcjj/sensitive v0.0.0-20200106142752-42d1c505be7b
 	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0
 	gorm.io/driver/mysql v1.5.1

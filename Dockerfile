@@ -11,7 +11,9 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 RUN apk --no-cache add ca-certificates
 RUN apk --no-cache add ffmpeg
 RUN mkdir -p static/assets/avatar
+RUN mkdir -p configs
 COPY ./static/assets/avatar/* /static/assets/avatar/
+COPY ./configs/dict.txt /configs/
 COPY --from=builder /app/main /main
 EXPOSE 8080 
 CMD ["/main"]

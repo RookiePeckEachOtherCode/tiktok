@@ -46,7 +46,7 @@ func VideoFeedController(c *gin.Context) {
 			log.Println("feed:", err)
 			c.JSON(http.StatusOK, dao.Response{
 				StatusCode: 1,
-				StatusMsg:  err.Error(),
+				StatusMsg:  "获取feed失败: " + err.Error(),
 			})
 		}
 		return
@@ -55,7 +55,7 @@ func VideoFeedController(c *gin.Context) {
 		log.Println("feed:", err)
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
+			StatusMsg:  "获取feed失败: " + err.Error(),
 		})
 	}
 }
@@ -78,7 +78,7 @@ func PublishListController(c *gin.Context) {
 		util.PrintLog("获取发布列表失败")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
+			StatusMsg:  "获取发布列表失败: " + err.Error(),
 		})
 		return
 	}
@@ -96,6 +96,22 @@ func PublishListController(c *gin.Context) {
 
 func PublishVideoController(c *gin.Context) {
 	title := c.PostForm("title")
+
+	flag, err := util.IsHaveDirty(title)
+	if err != nil {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error(),
+		})
+	}
+
+	if !flag {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  "标题含有敏感词",
+		})
+	}
+
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
 
@@ -114,7 +130,7 @@ func PublishVideoController(c *gin.Context) {
 		log.Println("视频获取失败: ", err)
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频获取失败",
+			StatusMsg:  "视频获取失败: " + err.Error(),
 		})
 		return
 	}
@@ -124,7 +140,7 @@ func PublishVideoController(c *gin.Context) {
 	if err := videoInfo.saveVideo(c); err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  fmt.Sprintf("视频保存失败: %s", err.Error()),
+			StatusMsg:  "视频保存失败: " + err.Error(),
 		})
 		log.Println("视频保存失败: ", err)
 		return
@@ -133,7 +149,7 @@ func PublishVideoController(c *gin.Context) {
 		log.Println("封面保存失败: ", err)
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  fmt.Sprintf("封面保存失败: %s", err.Error()),
+			StatusMsg:  "封面保存失败: " + err.Error(),
 		})
 		return
 	}

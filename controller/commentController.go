@@ -28,7 +28,7 @@ func CommentActionController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频id获取失败",
+			StatusMsg:  "视频id获取失败: " + err.Error(),
 		})
 	}
 	_actionType := c.Query("action_type")
@@ -37,7 +37,7 @@ func CommentActionController(c *gin.Context) {
 	if err1 != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "操作类型获取失败",
+			StatusMsg:  "操作类型获取失败: " + err.Error(),
 		})
 	}
 
@@ -48,7 +48,7 @@ func CommentActionController(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusOK, dao.Response{
 				StatusCode: 1,
-				StatusMsg:  "评论发布失败",
+				StatusMsg:  "评论发布失败: " + err.Error(),
 			})
 			return
 		}
@@ -68,7 +68,7 @@ func CommentActionController(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusOK, dao.Response{
 				StatusCode: 1,
-				StatusMsg:  "删除评论失败",
+				StatusMsg:  "删除评论失败: " + err.Error(),
 			})
 			return
 		}
@@ -85,7 +85,7 @@ func CommentListController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 0,
-			StatusMsg:  "无法获取视频id",
+			StatusMsg:  "无法获取视频id: " + err.Error(),
 		})
 	}
 	res, err := service.CommentListService(vid)
@@ -93,7 +93,7 @@ func CommentListController(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, service.FavoriteListReponse{
 			Response: dao.Response{
 				StatusCode: 0,
-				StatusMsg:  "获取评论列表失败",
+				StatusMsg:  "获取评论列表失败: " + err.Error(),
 			},
 		})
 	} else {
