@@ -85,3 +85,10 @@ func GetDictAbsPath() string {
 	log.Println(path)
 	return path + "/configs/dict.txt"
 }
+
+const (
+	AccessKey = "xxxxxxxxxxxxxxxxxxxx"
+	SecretKey = "xxxxxxxxxxxxxxxxxxxx"
+	Bucket    = "xxxxxxxxxxxxxxxxxxxx"
+	Url       = "xxxxxxxxxxxxxxxxxxxx"
+)
