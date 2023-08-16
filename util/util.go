@@ -9,6 +9,7 @@ import (
 	"tiktok/middleware/redis"
 	"time"
 
+	"github.com/importcjj/sensitive"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -47,4 +48,12 @@ func NewFileName(fileName string) string {
 
 func GetFileUrl(name, ty string) string {
 	return fmt.Sprintf("http://%v:%v/%v/%v", configs.LAN_IP, configs.GIN_PORT, ty, name)
+}
+
+func FilterDirty(str string) (string, error) {
+	filter := sensitive.New()
+	if err := filter.LoadWordDict(configs.GetDictAbsPath()); err != nil {
+		return "", errors.New("加载敏感词词典失败")
+	}
+	return filter.Replace(str, '*'), nil
 }
