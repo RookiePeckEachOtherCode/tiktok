@@ -17,7 +17,7 @@ func FavoriteActionController(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "获取用户id失败1",
+			StatusMsg:  "获取用户id失败",
 		})
 		return
 	}
@@ -25,7 +25,7 @@ func FavoriteActionController(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "获取用户id失败2",
+			StatusMsg:  "获取用户id失败",
 		})
 		return
 	}
@@ -36,7 +36,7 @@ func FavoriteActionController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "获取视频id失败",
+			StatusMsg:  "获取视频id失败: " + err.Error(),
 		})
 		return
 	}
@@ -48,7 +48,7 @@ func FavoriteActionController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "获取act失败",
+			StatusMsg:  "获取act失败: " + err.Error(),
 		})
 		return
 	}
@@ -60,7 +60,7 @@ func FavoriteActionController(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  fmt.Errorf("操作失败: %w", err).Error(),
+			StatusMsg:  "操作失败: " + err.Error(),
 		})
 		return
 	}

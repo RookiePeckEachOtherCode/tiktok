@@ -9,20 +9,22 @@ import (
 )
 
 type UserInfo struct {
-	ID            int64       `json:"id" gorm:"id,omitempty"`                         //用户id
-	Name          string      `json:"name" gorm:"name,omitempty"`                     //用户名称
-	FollowCount   int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
-	FollowerCount int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
-	IsFollow      bool        `json:"is_follow" gorm:"is_follow,omitempty"`           //当前登录用户是否关注该用户,true-已关注,false-未关注
-	UserLoginInfo *UserLogin  `json:"-"`                                              //用户与登录信息的一对一
-	Videos        []*Video    `json:"-"`                                              //用户与视频的一对多
-	Follows       []*UserInfo `json:"-" gorm:"many2many:user_relations;"`             //用户与关注用户之间的多对多
-	FavorVideos   []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`          //用户与喜欢视频之间的多对多
-	Comments      []*Comment  `json:"-"`                                              //用户与评论的一对多
-	TotalFavorite int64       `json:"total_favorited" gorm:"-"`                       //用户获赞数
-	WorkCount     int64       `json:"work_count" gorm:"-"`
-	Avatar        string      `json:"avatar" gorm:"avatar,omitempty"`
-	FavoriteCount int64       `json:"favorite_count" gorm:"-"` //用户喜欢的视频数
+	ID              int64       `json:"id" gorm:"id,omitempty"`                         //用户id
+	Name            string      `json:"name" gorm:"name,omitempty"`                     //用户名称
+	FollowCount     int64       `json:"follow_count" gorm:"follow_count,omitempty"`     //关注数
+	FollowerCount   int64       `json:"follower_count" gorm:"follower_count,omitempty"` //粉丝总数
+	IsFollow        bool        `json:"is_follow" gorm:"is_follow,omitempty"`           //当前登录用户是否关注该用户,true-已关注,false-未关注
+	UserLoginInfo   *UserLogin  `json:"-"`                                              //用户与登录信息的一对一
+	Videos          []*Video    `json:"-"`                                              //用户与视频的一对多
+	Follows         []*UserInfo `json:"-" gorm:"many2many:user_relations;"`             //用户与关注用户之间的多对多
+	FavorVideos     []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`          //用户与喜欢视频之间的多对多
+	Comments        []*Comment  `json:"-"`                                              //用户与评论的一对多
+	TotalFavorite   int64       `json:"total_favorited" gorm:"-"`                       //用户获赞数
+	WorkCount       int64       `json:"work_count" gorm:"-"`                            //作品数
+	Avatar          string      `json:"avatar" gorm:"avatar,omitempty"`                 //头像
+	FavoriteCount   int64       `json:"favorite_count" gorm:"-"`                        //用户喜欢的视频数
+	BackgroundImage string      `json:"background_image" gorm:"-"`                      //背景图片
+	Signature       string      `json:"signature" gorm:"-"`                             //个性签名
 }
 type Friend struct {
 	UserInfo
@@ -37,6 +39,7 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	if userInfo.ID == 0 {
 		return nil, errors.New("用户不存在")
 	}
+	userInfo.Signature = "这个人很懒，什么都没写"
 	userInfo.FavoriteCount = redis.New(redis.FAVORITE).GetUserFavoriteCount(userId)
 	userInfo.TotalFavorite = redis.New(redis.LIKED).GetUserReceivedLikeCount(userId)
 	return &userInfo, nil
