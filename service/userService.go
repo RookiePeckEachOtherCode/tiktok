@@ -3,10 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
-	"math/rand"
-	"tiktok/configs"
+	"log"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
+	"tiktok/util/tos"
 )
 
 type UserInfoResponse struct {
@@ -47,9 +47,10 @@ func UserRegisterService(name, password string) (string, int64, error) {
 	userinfo := dao.UserInfo{
 		UserLoginInfo: &userLogin,
 		Name:          name,
-		Avatar:        getRandomAvatar(),
+		Avatar:        tos.GetRandomAvatar(),
 	}
 
+	log.Println("userinfo_avatar", userinfo.Avatar)
 	// 生成token
 	token, err := jwt.NewToken(userinfo.ID)
 
@@ -83,11 +84,4 @@ func registerCheck(name string) error {
 	}
 
 	return nil
-}
-
-func getRandomAvatar() string {
-	//生成一个[1,8]的随机数
-	randNum := rand.Intn(9)
-	path := fmt.Sprintf("http://%v:%v/%v/%v.jpg", configs.LAN_IP, configs.GIN_PORT, configs.AVATAR_SAVE_PATH, randNum)
-	return path
 }

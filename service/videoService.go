@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"tiktok/util"
@@ -14,13 +13,6 @@ import (
 type FeedVideoFlow struct {
 	NextTime  int64         `json:"next_time,omitempty"`  //发布最早的时间，作为下次请求时的latest_time
 	VideoList *[]*dao.Video `json:"video_list,omitempty"` //视频列表
-}
-
-type SaveVideoInfo struct {
-	userId    int64
-	videoPath string
-	coverPath string
-	title     string
 }
 
 func VideoFeedService(userId int64, latestTime time.Time) (*FeedVideoFlow, error) {
@@ -60,19 +52,13 @@ func PublishListService(userId int64) (*[]dao.Video, error) {
 	return videos, nil
 }
 
-func PublishVideoService(userID int64, videoName, coverName, title string) error {
-	v := &SaveVideoInfo{userId: userID, title: title}
-
-	v.videoPath = util.GetFileUrl(videoName, configs.VIDEO_SAVE_PATH)
-	v.coverPath = util.GetFileUrl(coverName, configs.VIDEO_COVER_SAVE_PATH)
-
+func PublishVideoService(userID int64, videoSavePath, coverSavePath, title string) error {
 	err := dao.NewVideo(&dao.Video{
-		Title:      v.title,
-		UserInfoID: v.userId,
-		PlayURL:    v.videoPath,
-		CoverURL:   v.coverPath,
+		Title:      title,
+		UserInfoID: userID,
+		PlayURL:    videoSavePath,
+		CoverURL:   coverSavePath,
 	})
-
 	return err
 }
 

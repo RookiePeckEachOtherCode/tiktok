@@ -87,8 +87,19 @@ func GetDictAbsPath() string {
 }
 
 const (
-	AccessKey = "xxxxxxxxxxxxxxxxxxxx"
-	SecretKey = "xxxxxxxxxxxxxxxxxxxx"
-	Bucket    = "xxxxxxxxxxxxxxxxxxxx"
-	Url       = "xxxxxxxxxxxxxxxxxxxx"
+	AccessKey = "NFF437uo_bsPn9qgUqq7zc-FJpZvUe60dzKJ51G7"
+	SecretKey = "WFlql2ASEZ6FoVPH3ct_kyQyt6r5lLK9n0edgd2B"
+)
+
+const ( //video
+	VideoBucketName = "beriholic-video"
+	VideoBucketUrl  = "http://rzhmy6vyr.hn-bkt.clouddn.com/"
+)
+const ( //cover
+	CoverBucketName = "beriholic-cover"
+	CoverBucketUrl  = "http://rzhmfodag.hn-bkt.clouddn.com/"
+)
+const (
+	AvatarBucketName = "beriholic-avatar"
+	AvatarBucketUrl  = "http://rzhmt1o2t.hn-bkt.clouddn.com/"
 )

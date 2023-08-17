@@ -2,20 +2,17 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"mime/multipart"
 	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
 	"strconv"
+	"strings"
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	"tiktok/service"
 	"tiktok/util"
+	"tiktok/util/tos"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +27,7 @@ type PublishListResponse struct {
 	VideoList []dao.Video `json:"video_list"`
 }
 
-type VideoInfos struct {
+type VideoInfo struct {
 	file          *multipart.FileHeader
 	VideoName     string
 	CoverName     string
@@ -135,26 +132,16 @@ func PublishVideoController(c *gin.Context) {
 		return
 	}
 
-	videoInfo := getVideoInfo(data)
+	videoInfo, err := getVideoInfo(data)
 
-	if err := videoInfo.saveVideo(c); err != nil {
+	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频保存失败: " + err.Error(),
+			StatusMsg:  "视频获取失败: " + err.Error(),
 		})
-		log.Println("视频保存失败: ", err)
-		return
-	}
-	if err := videoInfo.saveCover(); err != nil {
-		log.Println("封面保存失败: ", err)
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "封面保存失败: " + err.Error(),
-		})
-		return
 	}
 	//持久化
-	if err := service.PublishVideoService(userId, videoInfo.VideoName, videoInfo.CoverName, title); err != nil {
+	if err := service.PublishVideoService(userId, videoInfo.VideoSavePath, videoInfo.CoverSavePath, title); err != nil {
 		log.Println("视频持久化失败: ", err)
 	}
 	c.JSON(http.StatusOK, dao.Response{
@@ -211,46 +198,27 @@ func notLogin(c *gin.Context) error {
 	return nil
 }
 
-func getVideoInfo(file *multipart.FileHeader) *VideoInfos {
-	videoInfo := VideoInfos{}
-	videoInfo.VideoName = util.NewFileName(file.Filename)
-	videoInfo.CoverName = string([]byte(videoInfo.VideoName)[:len(videoInfo.VideoName)-len(filepath.Ext(videoInfo.VideoName))]) + ".jpg"
-	videoInfo.VideoSavePath = filepath.Join(configs.VIDEO_SAVE_PATH, videoInfo.VideoName)
-	videoInfo.CoverSavePath = filepath.Join(configs.VIDEO_COVER_SAVE_PATH, videoInfo.CoverName)
-	videoInfo.file = file
-	return &videoInfo
+func getVideoInfo(file *multipart.FileHeader) (*VideoInfo, error) {
+	videoInfo := VideoInfo{file: file}
+	videoInfo.file.Filename = util.NewFileName(videoInfo.file.Filename)
+
+	if err := videoInfo.saveVideo(); err != nil {
+		return nil, err
+	}
+	coverName := strings.Split(videoInfo.file.Filename, ".")[0]
+	videoInfo.CoverName = "cover" + coverName + ".jpg"
+	videoInfo.CoverSavePath = configs.CoverBucketUrl + videoInfo.CoverName
+	return &videoInfo, nil
 }
 
-func (v VideoInfos) saveVideo(c *gin.Context) error {
-	return c.SaveUploadedFile(v.file, v.VideoSavePath)
-}
-
-func (v VideoInfos) saveCover() error {
-
-	coverDir := filepath.Dir(v.CoverSavePath)
-
-	if err := os.MkdirAll(coverDir, os.ModePerm); err != nil {
-		util.PrintLog(fmt.Sprintf("封面文件夹创建失败: %s", err.Error()))
-		return err
+func (v *VideoInfo) saveVideo() error {
+	if v.file == nil {
+		return errors.New("视频文件为空")
 	}
-
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("middleware/ffmpeg/ffmpeg.exe", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
-	case "linux":
-		cmd = exec.Command("ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
-	default:
-		cmd = exec.Command("middleware/ffmpeg/ffmpeg", "-i", v.VideoSavePath, "-vframes", "1", "-q:v", "2", v.CoverSavePath)
-	}
-
-	// 改用 exec.Command 的正确用法
-	err := cmd.Run()
-
+	path, err := tos.UploadToQiNiu(v.file)
 	if err != nil {
-		util.PrintLog(fmt.Sprintf("封面保存失败: %s", err.Error()))
 		return err
 	}
-
+	v.VideoSavePath = *path
 	return nil
 }
