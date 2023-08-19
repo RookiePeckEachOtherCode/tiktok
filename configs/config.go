@@ -85,3 +85,15 @@ func GetDictAbsPath() string {
 	log.Println(path)
 	return path + "/configs/dict.txt"
 }
+
+const (
+	TEST_DB_USER   = "root"
+	TEST_DB_PASSWD = "db22455"
+	TEST_DB_URL    = "127.0.0.1"
+	TEST_PORT      = "3306"
+	TEST_DB_NAME   = "tiktok-test"
+)
+
+func GetTestDBInfo() string {
+	return TEST_DB_USER + ":" + TEST_DB_PASSWD + "@tcp(" + TEST_DB_URL + ":" + TEST_PORT + ")/" + TEST_DB_NAME + "?charset=utf8mb4&parseTime=True&loc=Local"
+}
