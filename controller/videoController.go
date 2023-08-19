@@ -26,7 +26,7 @@ type FeedResponse struct {
 	*service.FeedVideoFlow
 }
 type PublishListResponse struct {
-	Response  dao.Response
+	dao.Response
 	VideoList []dao.Video `json:"video_list"`
 }
 
@@ -84,11 +84,11 @@ func PublishListController(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, PublishListResponse{
-		Response: dao.Response{
+		dao.Response{
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		VideoList: *videoList,
+		*videoList,
 	})
 
 	util.PrintLog("获取发布列表成功")
