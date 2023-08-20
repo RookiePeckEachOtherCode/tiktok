@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - 8080:8080
     environment:
       DB_NAME: tiktok
       DB_PASS: db22455
@@ -23,7 +23,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./configs/tiktok.sql:/docker-entrypoint-initdb.d/tiktok.sql
     ports:
-      - "3306:3306"
+      - 3306:3306
 
   redis:
     image: redis:alpine
