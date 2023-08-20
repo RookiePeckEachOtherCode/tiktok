@@ -38,7 +38,9 @@ func ChatActionController(c *gin.Context) {
 	_toUserId := c.Query("to_user_id")
 	toUserId, _ := strconv.ParseInt(_toUserId, 10, 64)
 	//get content
-	content := c.Query("content")
+	_content, _ := c.Get("content")
+	content, _ := _content.(string)
+
 	//get action_type
 	actionType := c.Query("action_type")
 

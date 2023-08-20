@@ -104,3 +104,12 @@ func Auth() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func FilterDirtyMessage() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_content := c.Query("content")
+		content, _ := util.FilterDirty(_content)
+		c.Set("content", content)
+		c.Next()
+	}
+}

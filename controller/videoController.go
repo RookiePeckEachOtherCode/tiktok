@@ -95,22 +95,8 @@ func PublishListController(c *gin.Context) {
 }
 
 func PublishVideoController(c *gin.Context) {
-	title := c.PostForm("title")
-
-	flag, err := util.IsHaveDirty(title)
-	if err != nil {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
-	}
-
-	if !flag {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "标题含有敏感词",
-		})
-	}
+	_title := c.PostForm("title")
+	title, _ := util.FilterDirty(_title)
 
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)

@@ -62,25 +62,8 @@ func UserLoginController(c *gin.Context) { //处理登录请求
 }
 
 func UserRegisterController(c *gin.Context) {
-	userName := c.Query("username")
-
-	flag, err := util.IsHaveDirty(userName)
-
-	if err != nil {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
-		return
-	}
-
-	if !flag {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "用户名含有敏感词",
-		})
-		return
-	}
+	_userName := c.Query("username")
+	userName, _ := util.FilterDirty(_userName)
 
 	_password, _ := c.Get("password")
 

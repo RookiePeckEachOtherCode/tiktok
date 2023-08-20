@@ -44,7 +44,7 @@ func Init() *gin.Engine {
 	//注册 关注的人列表 路由
 	apiGroup.GET("/relation/follow/list/", jwt.Auth(), controller.FollowListController)
 	//注册发送消息路由
-	apiGroup.POST("/message/action/", jwt.Auth(), controller.ChatActionController)
+	apiGroup.POST("/message/action/", jwt.Auth(), jwt.FilterDirtyMessage(), controller.ChatActionController)
 	// //注册消息列表路由
 	apiGroup.GET("/message/chat/", jwt.Auth(), controller.ChatRecordListController)
 	//注册好友列表路由
