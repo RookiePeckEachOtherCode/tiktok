@@ -125,16 +125,11 @@ func GetFavoriteList(userId int64) ([]*Video, error) {
 }
 
 // 用户获赞数+1
-func (u *UserInfo) PlusFavCount() error {
-	tx := DB.Begin()
-	if err := tx.Model(u).UpdateColumn("total_favorited", gorm.Expr("total_favorited + 1")).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+func (u *UserInfo) PlusFavCount() {
 	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(u.ID, true)
-	return tx.Commit().Error
 }
 
+// 关注
 func (u *UserInfo) FollowAct(tu *UserInfo) error {
 	tx := DB.Begin()
 	tx.Model(u)
@@ -188,6 +183,9 @@ func GetFollowerList(uid int64) ([]*UserInfo, error) {
 	var follower []*UserInfo
 	if err := DB.Model(&UserInfo{}).Where("id in (select user_info_id from user_relations where follow_id = ?)", uid).Find(&follower).Error; err != nil {
 		return nil, err
+	}
+	if len(follower) == 0 {
+		return nil, nil
 	}
 	return follower, nil
 }
