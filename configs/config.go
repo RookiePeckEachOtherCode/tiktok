@@ -87,12 +87,33 @@ func GetDictAbsPath() string {
 }
 
 const (
+	AccessKey = "NFF437uo_bsPn9qgUqq7zc-FJpZvUe60dzKJ51G7"
+	SecretKey = "WFlql2ASEZ6FoVPH3ct_kyQyt6r5lLK9n0edgd2B"
+)
+
+const ( //video
+	VideoBucketName = "beriholic-video"
+	VideoBucketUrl  = "http://rzhmy6vyr.hn-bkt.clouddn.com/"
+)
+
+const ( //cover
+	CoverBucketName = "beriholic-cover"
+	CoverBucketUrl  = "http://rzhmfodag.hn-bkt.clouddn.com/"
+)
+
+const (
+	AvatarBucketName = "beriholic-avatar"
+	AvatarBucketUrl  = "http://rzhmt1o2t.hn-bkt.clouddn.com/"
+)
+
+const(
 	TEST_DB_USER   = "root"
 	TEST_DB_PASSWD = "db22455"
 	TEST_DB_URL    = "127.0.0.1"
 	TEST_PORT      = "3306"
 	TEST_DB_NAME   = "tiktok-test"
 )
+
 
 func GetTestDBInfo() string {
 	return TEST_DB_USER + ":" + TEST_DB_PASSWD + "@tcp(" + TEST_DB_URL + ":" + TEST_PORT + ")/" + TEST_DB_NAME + "?charset=utf8mb4&parseTime=True&loc=Local"
