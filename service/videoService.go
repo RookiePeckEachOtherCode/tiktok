@@ -12,11 +12,6 @@ import (
 )
 
 // FeedVideoFlow 包含下次请求的最早发布时间和视频列表
-type FeedVideoFlow struct {
-	NextTime  int64         `json:"next_time,omitempty"`  //发布最早的时间，作为下次请求时的latest_time
-	VideoList *[]*dao.Video `json:"video_list,omitempty"` //视频列表
-}
-
 type SaveVideoInfo struct {
 	userId    int64
 	videoPath string
@@ -24,25 +19,19 @@ type SaveVideoInfo struct {
 	title     string
 }
 
-func VideoFeedService(userId int64, latestTime time.Time) (*FeedVideoFlow, error) {
-	if latestTime.IsZero() {
-		latestTime = time.Now()
-	}
+func VideoFeedService(userId int64, latestTime time.Time) (*[]*dao.Video, error) {
 	videoList, err := dao.GetVideoListByLastTime(latestTime)
 	if err != nil {
+		tiktokLog.Error(fmt.Sprintf("获取视频fedd失败：%v, 时间: %v, userId: %d", err, latestTime, userId))
 		return nil, fmt.Errorf("获取视频fedd失败：%v", err)
 	}
-	_latestTime, _ := util.UpdateVideoInfo(userId, videoList)
-	var nextTime int64
-	if _latestTime != nil {
-		nextTime = (*_latestTime).UnixNano() / 1e6
-	} else {
-		nextTime = time.Now().Unix() / 1e6
+	err = util.UpdateVideoInfo(userId, videoList)
+
+	if err != nil {
+		return nil, err
 	}
-	return &FeedVideoFlow{
-		NextTime:  nextTime,
-		VideoList: videoList,
-	}, nil
+
+	return videoList, nil
 }
 
 // PublishListService 获取发布列表

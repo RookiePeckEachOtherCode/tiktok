@@ -21,8 +21,8 @@ type Video struct {
 	CoverURL      string      `gorm:"column:cover_url" json:"cover_url"`           // 封面地址
 	Users         []*UserInfo `gorm:"many2many:user_favor_videos" json:"-"`        //点赞的用户
 	Comments      []*Comment  `json:"-"`                                           //评论列表
-	CreatedAt     time.Time   `json:"-"`                                           //上传时间
-	UpdatedAt     time.Time   `json:"-"`
+	CreatedAt     time.Time   `json:"-" gorm:"created_at"`                         //上传时间
+	UpdatedAt     time.Time   `json:"-" gorm:"updated_at"`                         //更新时间
 }
 
 // GetVideoListByLastTime 根据上传时间获取视频列表
@@ -30,7 +30,6 @@ func GetVideoListByLastTime(lastTime time.Time) (*[]*Video, error) {
 	var videos []*Video
 	err := DB.Model(&Video{}).Where("created_at<?", lastTime).
 		Order("created_at DESC").Limit(configs.MAX_VIDEO_CNT).
-		Select([]string{"id", "user_info_id", "play_url", "cover_url", "favorite_count", "comment_count", "is_favorite", "title", "created_at", "updated_at"}).
 		Find(&videos).Error
 	return &videos, err
 }
@@ -61,4 +60,12 @@ func GetCommentList(vid int64) ([]*Comment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+func GetNextTimeByVideoId(vid int64) (time.Time, error) {
+	var video Video
+	if err := DB.Model(&Video{}).Where("id=?", vid).Select([]string{"created_at"}).First(&video).Error; err != nil {
+		return time.Time{}, err
+	}
+	return video.CreatedAt, nil
 }
