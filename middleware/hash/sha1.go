@@ -3,25 +3,28 @@ package hash
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"tiktok/configs"
 	"tiktok/dao"
+	tiktokLog "tiktok/util/log"
+
+	"github.com/gin-gonic/gin"
 )
 
 // HashPassword 中间件 - 对密码进行SHA1哈希
 func CheckAndHashPassword() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		pwd := getPassword(c)
 
 		if len(pwd) == 0 {
+			tiktokLog.Error("密码不能为空")
 			returnError(c, "密码不能为空")
 			c.Abort()
 			return
 		}
 
 		if len(pwd) >= configs.MAX_PASSWORD_LEN {
+			tiktokLog.Error("密码长度超过限制")
 			returnError(c, "密码长度超过限制")
 			c.Abort()
 			return
@@ -39,12 +42,14 @@ func CheckUserName() gin.HandlerFunc {
 		uname := getUserName(c)
 
 		if len(uname) == 0 {
+			tiktokLog.Error("用户名不能为空")
 			returnError(c, "用户名不能为空")
 			c.Abort()
 			return
 		}
 
 		if len(uname) >= configs.MAX_NAME_LEN {
+			tiktokLog.Error("用户名长度超过限制")
 			returnError(c, "用户名长度超过限制")
 			c.Abort()
 			return

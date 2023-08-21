@@ -7,6 +7,7 @@ import (
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"tiktok/router"
+	tiktokLog "tiktok/util/log"
 )
 
 func main() {
@@ -18,6 +19,8 @@ func main() {
 	redis.Init()
 	// 初始化路由
 	InitGin()
+
+	tiktokLog.Normal("服务启动成功")
 }
 
 func InitGin() {

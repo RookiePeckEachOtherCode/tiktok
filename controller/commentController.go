@@ -14,6 +14,7 @@ type CommentActResponse struct {
 	Comment dao.Comment `json:"comment"`
 }
 
+// 用户评论操作
 func CommentActionController(c *gin.Context) {
 	_userid, _ := c.Get("user_id")
 	userid, ok1 := _userid.(int64)
@@ -79,6 +80,7 @@ func CommentActionController(c *gin.Context) {
 	}
 }
 
+// 获取评论列表
 func CommentListController(c *gin.Context) {
 	Vid := c.Query("video_id")
 	vid, err := strconv.ParseInt(Vid, 9, 64)

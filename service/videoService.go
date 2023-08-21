@@ -7,6 +7,7 @@ import (
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"tiktok/util"
+	tiktokLog "tiktok/util/log"
 	"time"
 )
 
@@ -52,7 +53,6 @@ func PublishListService(userId int64) (*[]dao.Video, error) {
 	}
 
 	// 为视频列表添加作者信息
-	util.PrintLog(fmt.Sprintf("调用了service的获取发布列表函数，userId:%d", userId))
 	for i := range *videos {
 		(*videos)[i].Author = *userInfo
 		(*videos)[i].IsFavorite = redis.New(redis.FAVORITE).GetFavoriteState(userId, (*videos)[i].ID)
@@ -98,6 +98,7 @@ func publishListCheck(userId int64) (*dao.UserInfo, *[]dao.Video, error) {
 // checkIsExistByID 根据用户id检查用户是否存在
 func checkIsExistByID(userId int64) error {
 	if !dao.CheckIsExistByID(userId) {
+		tiktokLog.Error(fmt.Sprintf("用户不存在,userId: %d", userId))
 		return errors.New("该用户不存在")
 	}
 	return nil

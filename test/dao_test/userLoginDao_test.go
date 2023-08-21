@@ -82,6 +82,7 @@ func TestJudgeUserPassword(t *testing.T) {
 	}
 
 	for _, user := range users {
+		dao.DB.Delete(&user.UserLoginInfo)
 		dao.DB.Delete(&user)
 	}
 
@@ -137,6 +138,7 @@ func TestIsExistUserLoginInfoByName(t *testing.T) {
 	}
 
 	for _, user := range users {
+		dao.DB.Delete(&user.UserLoginInfo)
 		dao.DB.Delete(&user)
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"tiktok/dao"
 	"tiktok/service"
-	"tiktok/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +15,7 @@ type GetFollowerListResponse struct {
 	UserList []*dao.UserInfo `json:"user_list"`
 }
 
+// 用户关注操作
 func FollowActionController(c *gin.Context) {
 	Tid := c.Query("to_user_id")
 	Act := c.Query("action_type")
@@ -57,6 +57,7 @@ func FollowActionController(c *gin.Context) {
 	}
 }
 
+// 获取用户关注列表
 func FollowListController(c *gin.Context) {
 	Uid := c.Query("user_id")
 	uid, err := strconv.ParseInt(Uid, 10, 64)
@@ -78,6 +79,7 @@ func FollowListController(c *gin.Context) {
 	}
 }
 
+// 获取用户粉丝列表
 func FollowerListController(c *gin.Context) {
 	_userId := c.Query("user_id")
 	userId, err := strconv.ParseInt(_userId, 10, 64)
@@ -89,12 +91,9 @@ func FollowerListController(c *gin.Context) {
 		return
 	}
 
-	util.PrintLog(fmt.Sprintf("user_id:%v", userId))
-
 	userList, err := service.FollowerListService(userId)
 
 	if err != nil {
-		util.PrintLog(fmt.Sprintf("获取关注列表失败，err:%v", err))
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "获取关注列表失败: " + err.Error(),
@@ -102,7 +101,6 @@ func FollowerListController(c *gin.Context) {
 		return
 	}
 
-	util.PrintLog(fmt.Sprintf("获取关注列表成功，userList:%v", userList))
 	c.JSON(http.StatusOK, GetFollowerListResponse{
 		Response: dao.Response{
 			StatusCode: 0,

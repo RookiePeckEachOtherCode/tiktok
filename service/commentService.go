@@ -33,7 +33,7 @@ func PostCommentService(vid, uid int64, context string) (*dao.Comment, error) {
 }
 
 func DeleteCommentService(commentId string) error {
-	comment, err := dao.FindComment(commentId)
+	comment, err := dao.FindCommentByCommentId(commentId)
 	if err != nil {
 		return err
 	}
@@ -49,8 +49,6 @@ func CommentListService(vid int64) (res *CommentListResponse, err error) {
 		return nil, err
 	}
 
-	//添加评论信息
-	//因为数据库没有存储UserInfo,和CreatedDate
 	for _, v := range commentList {
 		userInfo, err := dao.GetUserInfoById(v.UserInfoID)
 		if err != nil {

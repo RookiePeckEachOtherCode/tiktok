@@ -1,8 +1,8 @@
 package dao_test
 
 import (
+	"io"
 	"log"
-	"os"
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
@@ -17,14 +17,12 @@ var testDb *gorm.DB
 
 func InitTestDb() {
 	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		log.New(io.Discard, "\r\n", log.LstdFlags), // 不输出日志
 		logger.Config{
-			SlowThreshold: time.Second,
-			LogLevel:      logger.Info,
-			Colorful:      true,
+			SlowThreshold: time.Second,   // 慢SQL阈值
+			LogLevel:      logger.Silent, // 日志级别
 		},
 	)
-
 	testDb, _ = gorm.Open(mysql.Open(configs.GetTestDBInfo()), &gorm.Config{
 		Logger:                 newLogger,
 		PrepareStmt:            true,
@@ -34,6 +32,7 @@ func InitTestDb() {
 
 func InitTestRedis() {
 	redis.Init()
+	redis.RedisFlushAll()
 }
 
 func TestInit() {

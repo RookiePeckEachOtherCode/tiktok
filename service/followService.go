@@ -2,9 +2,10 @@ package service
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
+	tiktokLog "tiktok/util/log"
 )
 
 type FollowerResponse struct {
@@ -13,31 +14,30 @@ type FollowerResponse struct {
 }
 
 func FollowActionService(act int64, tid int64, uid int64) error {
-
 	if !dao.CheckIsExistByID(tid) {
-		log.Println("用户不存在")
+		tiktokLog.Error(fmt.Sprintf("用户不存在,tid: %d", tid))
 		return errors.New("用户不存在")
 	}
 	if tid == uid {
-		log.Println("不能关注自己")
+		tiktokLog.Error("不能关注自己,tid: ", tid)
 		return errors.New("不能关注自己")
 	}
 
 	if act == 1 {
 		if !dao.GetUserRelation(uid, tid) {
 			if err := (&dao.UserInfo{ID: uid}).FollowAct(&dao.UserInfo{ID: tid}); err != nil {
+				tiktokLog.Error(fmt.Sprintf("关注失败,uid: %d, tid: %d, Error:%v", uid, tid, err))
 				return err
 			}
 			redis.New(redis.RELATION).UpdateUserRelation(uid, tid, true)
 			return nil
 		} else {
-			log.Println("当前用户已关注")
+			tiktokLog.Error(fmt.Sprintf("当前用户已关注,uid: %d, tid: %d", uid, tid))
 			return errors.New("当前用户已关注")
 		}
 	}
 	if act == 2 {
 		if err := (&dao.UserInfo{ID: uid}).UnFollowAct(&dao.UserInfo{ID: tid}); err != nil {
-			log.Println("取消关注失败")
 			return err
 		}
 		redis.New(redis.RELATION).UpdateUserRelation(uid, tid, false)
@@ -64,6 +64,7 @@ func FollowListService(uid int64) (*FollowerResponse, error) {
 
 func FollowerListService(userId int64) ([]*dao.UserInfo, error) {
 	if !dao.CheckIsExistByID(userId) {
+		tiktokLog.Error(fmt.Sprintf("用户不存在,userId: %d", userId))
 		return nil, errors.New("该用户不存在")
 	}
 

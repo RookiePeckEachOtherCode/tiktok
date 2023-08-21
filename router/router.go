@@ -1,6 +1,8 @@
 package router
 
 import (
+	"io"
+	"os"
 	"tiktok/controller"
 	"tiktok/middleware/hash"
 	"tiktok/middleware/jwt"
@@ -11,6 +13,16 @@ import (
 // 初始化路由
 
 func Init() *gin.Engine {
+	// 禁用控制台颜色，将日志写入文件时不需要控制台颜色。
+	gin.DisableConsoleColor()
+
+	// 记录到文件。
+	f, _ := os.Create("gin.log")
+	gin.DefaultWriter = io.MultiWriter(f)
+
+	// 如果需要同时将日志写入文件和控制台，请使用以下代码。
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
 	r := gin.Default()
 
 	r.Static("static", "./static")
@@ -44,7 +56,7 @@ func Init() *gin.Engine {
 	//注册 关注的人列表 路由
 	apiGroup.GET("/relation/follow/list/", jwt.Auth(), controller.FollowListController)
 	//注册发送消息路由
-	apiGroup.POST("/message/action/", jwt.Auth(), controller.ChatActionController)
+	apiGroup.POST("/message/action/", jwt.Auth(), jwt.FilterDirtyMessage(), controller.ChatActionController)
 	// //注册消息列表路由
 	apiGroup.GET("/message/chat/", jwt.Auth(), controller.ChatRecordListController)
 	//注册好友列表路由

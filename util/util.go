@@ -53,19 +53,7 @@ func GetFileUrl(name, ty string) string {
 func FilterDirty(str string) (string, error) {
 	filter := sensitive.New()
 	if err := filter.LoadWordDict(configs.GetDictAbsPath()); err != nil {
-		return "", errors.New("加载敏感词词典失败")
+		panic(err)
 	}
 	return filter.Replace(str, '*'), nil
-}
-
-func IsHaveDirty(str string) (bool, error) {
-	filter := sensitive.New()
-	if err := filter.LoadWordDict(configs.GetDictAbsPath()); err != nil {
-		return false, errors.New("加载敏感词词典失败")
-	}
-
-	flag, _ := filter.Validate(str)
-
-	return flag, nil
-
 }
