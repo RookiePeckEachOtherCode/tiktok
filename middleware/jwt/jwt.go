@@ -5,7 +5,6 @@ import (
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/util"
-	tiktokLog "tiktok/util/log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -58,47 +57,39 @@ func ParseToken(tokenString string) (*Claims, bool) {
 // 鉴权
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 如果token为空
 		tokenStr := c.Query("token")
-		if len(tokenStr) == 0 {
+		if tokenStr == "" {
 			tokenStr = c.PostForm("token")
 		}
-		if len(tokenStr) == 0 {
-			tiktokLog.Error("token为空", tokenStr)
-			c.JSON(http.StatusUnauthorized, dao.Response{
-				StatusCode: -1,
-				StatusMsg:  "unauthorized: 用户不存在或者未登录",
-			})
-			c.Abort()
-			return
-		}
-		//fmt.Printf("%v\n", tokenStr)
-		token, ok := ParseToken(tokenStr)
-		// 如果token无效
-		if !ok {
-			tiktokLog.Error("token无效", tokenStr)
-			c.JSON(http.StatusForbidden, dao.Response{
-				StatusCode: -1,
-				StatusMsg:  "forbidden: token无效",
-			})
-			c.Abort()
-			return
-		}
-
-		// 如果token过期
-		if time.Now().Unix() > token.ExpiresAt {
-			tiktokLog.Error("token已过期", token)
+		//用户不存在
+		if tokenStr == "" {
 			c.JSON(http.StatusOK, dao.Response{
-				StatusCode: -1,
-				StatusMsg:  "token已过期",
+				StatusCode: 401,
+				StatusMsg:  "该用户不存在",
 			})
-
-			c.Abort()
+			c.Abort() //阻止执行
 			return
 		}
-		// 将userId写入上下文
-		c.Set("user_id", token.UserId)
-		// 继续执行
+		//验证token
+		tokenStruck, ok := ParseToken(tokenStr)
+		if !ok {
+			c.JSON(http.StatusOK, dao.Response{
+				StatusCode: 403,
+				StatusMsg:  "token不正确",
+			})
+			c.Abort() //阻止执行
+			return
+		}
+		//token超时
+		if time.Now().Unix() > tokenStruck.ExpiresAt {
+			c.JSON(http.StatusOK, dao.Response{
+				StatusCode: 402,
+				StatusMsg:  "token过期",
+			})
+			c.Abort() //阻止执行
+			return
+		}
+		c.Set("user_id", tokenStruck.UserId)
 		c.Next()
 	}
 }
