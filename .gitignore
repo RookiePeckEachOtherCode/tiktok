@@ -4,3 +4,4 @@ config.yml
 static/assets/cover
 static/assets/video
 gin.log
+gin.log
