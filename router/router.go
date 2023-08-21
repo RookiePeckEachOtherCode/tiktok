@@ -17,7 +17,7 @@ func Init() *gin.Engine {
 	gin.DisableConsoleColor()
 
 	// 记录到文件。
-	f, _ := os.Create("gin.log")
+	f, _ := os.Create("tiktok.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 
 	// 如果需要同时将日志写入文件和控制台，请使用以下代码。
