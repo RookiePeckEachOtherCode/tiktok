@@ -2,23 +2,15 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"tiktok/router"
 	tiktokLog "tiktok/util/log"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	f, _ := os.Create("gin.log")
-	gin.DefaultWriter = io.MultiWriter(f)
-	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
-
 	// 添加东方神秘力量
 	configs.Bless()
 	// 初始化数据库

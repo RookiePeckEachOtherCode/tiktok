@@ -93,7 +93,6 @@ func FavoriteListController(c *gin.Context) {
 		fmt.Printf("%v\n", err)
 	} else {
 		c.JSON(http.StatusOK, res)
-		println("已经上传了喜欢列表")
 	}
 
 }
