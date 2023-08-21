@@ -12,7 +12,7 @@ type UserLogin struct {
 	Password   string `gorm:"column:password;notnull"`    // 密码
 }
 
-// 根据传入的用户名和密码查找数据
+// JudgeUserPassword 判断用户密码是否正确，正确返回用户id，错误返回错误信息
 func JudgeUserPassword(name, password string) (int64, error) {
 	if !IsExistUserLoginInfoByName(name) {
 		return 0, errors.New("该用户不存在")
@@ -27,6 +27,7 @@ func JudgeUserPassword(name, password string) (int64, error) {
 	return userlogInfo.ID, nil
 }
 
+// IsExistUserLoginInfoByName 通过用户名判断用户是否存在
 func IsExistUserLoginInfoByName(name string) bool {
 	var userLogin UserLogin
 	DB.Where("username=?", name).First(&userLogin)

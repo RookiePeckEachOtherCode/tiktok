@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"tiktok/dao"
 	"tiktok/service"
@@ -28,6 +27,7 @@ type GetUserInfoResponse struct {
 	USerInfo dao.UserInfo `json:"user"` // 用户id
 }
 
+// 用户登录操作
 func UserLoginController(c *gin.Context) { //处理登录请求
 	userName := c.Query("username")
 	_password, _ := c.Get("password")
@@ -61,6 +61,7 @@ func UserLoginController(c *gin.Context) { //处理登录请求
 
 }
 
+// 用户注册操作
 func UserRegisterController(c *gin.Context) {
 	_userName := c.Query("username")
 	userName, _ := util.FilterDirty(_userName)
@@ -100,11 +101,10 @@ func UserRegisterController(c *gin.Context) {
 	})
 }
 
+// 获取用户信息
 func UserInfoController(c *gin.Context) {
-	util.PrintLog("在调用GetUserInfoById方法")
 	_userid, ok := c.Get("user_id")
 	if !ok {
-		log.Println("对方id获取失败")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "用户id获取失败",
@@ -113,7 +113,6 @@ func UserInfoController(c *gin.Context) {
 	}
 	USerId, okk := _userid.(int64)
 	if !okk {
-		log.Println("断言失败")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "断言失败",
@@ -122,14 +121,12 @@ func UserInfoController(c *gin.Context) {
 	}
 	USerInfo, err := dao.GetUserInfoById(USerId)
 	if err != nil {
-		log.Println("用户信息获取失败")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 		})
 		return
 	}
 
-	util.PrintLog(fmt.Sprintf("user_name: %v, user_id: %v,favorite_count:%v,have_favorite_count:%v,work_count:%v", USerInfo.Name, USerInfo.ID, USerInfo.TotalFavorite, USerInfo.TotalFavorite, USerInfo.WorkCount))
 	c.JSON(http.StatusOK, GetUserInfoResponse{
 		Response: dao.Response{
 			StatusCode: 0,

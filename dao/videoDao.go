@@ -1,7 +1,9 @@
 package dao
 
 import (
+	"fmt"
 	"tiktok/configs"
+	tiktokLog "tiktok/util/log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -33,13 +35,15 @@ func GetVideoListByLastTime(lastTime time.Time) (*[]*Video, error) {
 	return &videos, err
 }
 
-func NewVideo(v *Video) error { //上传视频
+// NewVideo 保存视频到数据库
+func NewVideo(v *Video) error {
 	if v == nil {
 		return errors.New("[NewVideo] video为空")
 	}
 	return DB.Create(v).Error
 }
 
+// GetVideoListByUserId 通过用户id查询用户视频列表
 func GetVideoListByUserId(userId int64) (*[]Video, error) { //通过用户id查询用户视频列表
 	var videoList []Video
 
@@ -48,11 +52,12 @@ func GetVideoListByUserId(userId int64) (*[]Video, error) { //通过用户id查�
 	return &videoList, err
 }
 
-// 通过视频id获取评论列表
+// GetCommentList 获取视频评论列表
 func GetCommentList(vid int64) ([]*Comment, error) {
 	var comments []*Comment
 
 	if err := DB.Model(&Comment{}).Where("video_id=?", vid).Find(&comments).Error; err != nil {
+		tiktokLog.Error(fmt.Sprintf("获取视频评论列表失败,vid: %d, Error:%v", vid, err))
 		return nil, err
 	}
 	return comments, nil

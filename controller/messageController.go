@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"tiktok/dao"
 	"tiktok/service"
-	"tiktok/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +20,7 @@ type FriendListResponse struct {
 	FriendList []*dao.Friend `json:"user_list"`
 }
 
+// 用户聊天操作
 func ChatActionController(c *gin.Context) {
 	//get user_id
 	_userId, _ := c.Get("user_id")
@@ -71,6 +70,7 @@ func ChatActionController(c *gin.Context) {
 
 }
 
+// 获取聊天记录
 func ChatRecordListController(c *gin.Context) {
 	_toUserId := c.Query("to_user_id")
 	if _toUserId == "" {
@@ -105,10 +105,6 @@ func ChatRecordListController(c *gin.Context) {
 
 	messageList, err := service.ChatRecordService(userId, toUserId, preMsgTime)
 
-	for _, v := range messageList {
-		util.PrintLog(fmt.Sprintln("from_user_id:", v.FromUserId, "to_user_id:", v.ToUserId, "content:", v.Content, "create_time:", v.CreatedTime))
-	}
-
 	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
@@ -126,13 +122,13 @@ func ChatRecordListController(c *gin.Context) {
 	})
 }
 
+// 获取好友列表
 func FriendListController(c *gin.Context) {
 	userId, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
 	userList, err := service.FriendListService(userId)
 
 	if err != nil {
-		log.Println("获取好友列表失败", err)
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "获取好友列表失败" + err.Error(),

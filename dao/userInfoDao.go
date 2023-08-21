@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"tiktok/middleware/redis"
+	tiktokLog "tiktok/util/log"
 
 	"gorm.io/gorm"
 )
@@ -37,6 +38,7 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	var userInfo UserInfo
 	DB.Where("id=?", userId).First(&userInfo)
 	if userInfo.ID == 0 {
+		tiktokLog.Error("用户不存在, userId: ", userId)
 		return nil, errors.New("用户不存在")
 	}
 	userInfo.Signature = "这个人很懒，什么都没写"
@@ -48,12 +50,17 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 // AddUserInfo 保存用户信息到数据库
 func AddUserInfo(user *UserInfo) error {
 	if user == nil {
+		tiktokLog.Error("用户信息为空")
 		return errors.New("user is nil")
 	}
-	return DB.Create(user).Error
+	err := DB.Create(user).Error
+	if err != nil {
+		tiktokLog.Error("保存用户信息到数据库失败: ", err.Error(), "user: ", user)
+	}
+	return err
 }
 
-// 通过名字查询用户是否存在
+// CheckIsExistByName 通过用户名查询用户是否存
 func CheckIsExistByName(name string) bool {
 	var userInfo UserInfo
 	DB.Where("name=?", name).Select([]string{"id"}).First(&userInfo)
@@ -61,7 +68,7 @@ func CheckIsExistByName(name string) bool {
 	return userInfo.ID != 0
 }
 
-// 通过id查询用户是否存在
+// CheckIsExistByID 通过id查询用户是否存在
 func CheckIsExistByID(id int64) bool {
 	var userInfo UserInfo
 	DB.Where("id=?", id).Select([]string{"id"}).First(&userInfo)
@@ -69,23 +76,26 @@ func CheckIsExistByID(id int64) bool {
 	return userInfo.ID != 0
 }
 
+// GetIsFavorite 获取用户是否喜欢该视频
 func (u *UserInfo) GetIsFavorite(videoId int64) bool {
 	count := DB.Model(u).Where("video_id = ?", videoId).Association("FavorVideos").Count()
 	return count > 0
 }
 
-// FavoriteVideo 给视频点赞
+// ToFavoriteVideo 点赞
 func (u *UserInfo) ToFavoriteVideo(video *Video) error {
 
 	tx := DB.Begin()
 
 	if err := tx.Model(video).UpdateColumn("favorite_count", gorm.Expr("favorite_count + 1")).Error; err != nil {
 		tx.Rollback()
+		tiktokLog.Error("更新视频点赞数失败: ", err.Error(), "videoId: ", video.ID)
 		return err
 	}
 
 	if err := tx.Model(u).Association("FavorVideos").Append(video); err != nil {
 		tx.Rollback()
+		tiktokLog.Error("将视频添加到用户喜欢的视频列表失败: ", err.Error(), "videoId: ", video.ID, "userId: ", u.ID)
 		return err
 	}
 	redis.New(redis.FAVORITE).UpdateFavoriteState(u.ID, video.ID, true)
@@ -94,17 +104,19 @@ func (u *UserInfo) ToFavoriteVideo(video *Video) error {
 	return tx.Commit().Error
 }
 
-// CancelFavorite 取消点赞
+// TOCancelFavorite 取消点赞
 func (u *UserInfo) ToCancelFavorite(video *Video) error {
 
 	tx := DB.Begin()
 
 	if err := tx.Model(video).Where("favorite_count > 0").UpdateColumn("favorite_count", gorm.Expr("favorite_count - 1")).Error; err != nil {
+		tiktokLog.Error("更新视频点赞数失败: ", err.Error(), "videoId: ", video.ID)
 		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Model(u).Association("FavorVideos").Delete(video); err != nil {
+		tiktokLog.Error("将视频从用户喜欢的视频列表移除失败: ", err.Error(), "videoId: ", video.ID, "userId: ", u.ID)
 		tx.Rollback()
 		return err
 	}
@@ -113,23 +125,24 @@ func (u *UserInfo) ToCancelFavorite(video *Video) error {
 	return tx.Commit().Error
 }
 
-// 通过id获取用户喜欢的视频列表
+// GetFavoriteList 获取用户喜欢的视频列表
 func GetFavoriteList(userId int64) ([]*Video, error) {
 	var userInfo UserInfo
 	err := DB.Preload("FavorVideos").First(&userInfo, "id=?", userId).Error
 	if err != nil {
+		tiktokLog.Error("获取用户喜欢的视频列表失败: ", err.Error(), "userId: ", userId)
 		return nil, err
 	} else {
 		return userInfo.FavorVideos, nil
 	}
 }
 
-// 用户获赞数+1
+// PlusFavCount 用户获赞数+1
 func (u *UserInfo) PlusFavCount() {
 	redis.New(redis.LIKED).UpdateUserReceivedLikeCount(u.ID, true)
 }
 
-// 关注
+// FollowAct 关注
 func (u *UserInfo) FollowAct(tu *UserInfo) error {
 	tx := DB.Begin()
 	tx.Model(u)
@@ -149,18 +162,21 @@ func (u *UserInfo) FollowAct(tu *UserInfo) error {
 	return nil
 }
 
-// 取关
+// UnFollowAct 取消关注
 func (u *UserInfo) UnFollowAct(tu *UserInfo) error {
 	tx := DB.Begin()
 	if err := tx.Model(u).Association("Follows").Delete(tu); err != nil { //从自己的关注列表移除
+		tiktokLog.Error("将用户从关注列表移除失败: ", err.Error(), "userId: ", u.ID, "followId: ", tu.ID)
 		tx.Rollback()
 		return err
 	}
 	if err := tx.Model(u).UpdateColumn("follow_count", gorm.Expr("follow_count -1")).Error; err != nil { //自己关注数-1
+		tiktokLog.Error("更新用户关注数失败: ", err.Error(), "userId: ", u.ID)
 		tx.Rollback()
 		return err
 	}
 	if err := tx.Model(tu).UpdateColumn("follower_count", gorm.Expr("follower_count -1")).Error; err != nil { //对方粉丝数-1
+		tiktokLog.Error("更新用户粉丝数失败: ", err.Error(), "userId: ", tu.ID)
 		tx.Rollback()
 		return err
 	}
@@ -168,20 +184,23 @@ func (u *UserInfo) UnFollowAct(tu *UserInfo) error {
 	return nil
 }
 
-// 获取用户关注列表
+// GetFollowList 获取用户关注列表
 func GetFloList(uid int64) ([]*UserInfo, error) {
 	var userInfo UserInfo
 	err := DB.Preload("Follows").First(&userInfo, "id=?", uid).Error
 	if err != nil {
+		tiktokLog.Error("获取用户关注列表失败: ", err.Error(), "userId: ", uid)
 		return nil, err
 	} else {
 		return userInfo.Follows, nil
 	}
 }
 
+// GetFollowList 获取用户关注列表
 func GetFollowerList(uid int64) ([]*UserInfo, error) {
 	var follower []*UserInfo
 	if err := DB.Model(&UserInfo{}).Where("id in (select user_info_id from user_relations where follow_id = ?)", uid).Find(&follower).Error; err != nil {
+		tiktokLog.Error("获取用户粉丝列表失败: ", err.Error(), "userId: ", uid)
 		return nil, err
 	}
 	if len(follower) == 0 {
@@ -201,6 +220,8 @@ func GetUserRelation(uid, tid int64) bool { //uid是否关注tid
 	count := tx.Model(&userInfo).Where("id=?", tid).Association("Follows").Count()
 	return count > 0
 }
+
+// GetMutualFriendListById 获取两个用户的共同好友列表
 func GetMutualFriendListById(userId int64) ([]*UserInfo, error) {
 	var mutualFriendList []int64
 	var Friends []*UserInfo
@@ -226,7 +247,7 @@ func GetMutualFriendListById(userId int64) ([]*UserInfo, error) {
 }
 
 // messageType消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
-
+// GetNewestMessageByUserIdAndToUserID 获取两个用户之间最新的一条消息
 func GetNewestMessageByUserIdAndToUserID(userId int64, toUserId int64) (string, int8, error) {
 	message := ChatRecord{}
 	result := DB.Where("user_id = ? AND to_user_id = ? ", userId, toUserId).

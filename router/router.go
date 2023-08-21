@@ -11,6 +11,7 @@ import (
 // 初始化路由
 
 func Init() *gin.Engine {
+
 	r := gin.Default()
 
 	r.Static("static", "./static")
