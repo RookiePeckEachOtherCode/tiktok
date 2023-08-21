@@ -23,7 +23,7 @@ type FeedResponse struct {
 	*service.FeedVideoFlow
 }
 type PublishListResponse struct {
-	Response  dao.Response
+	dao.Response
 	VideoList []dao.Video `json:"video_list"`
 }
 
@@ -35,6 +35,7 @@ type VideoInfo struct {
 	CoverSavePath string
 }
 
+// 获取feed流
 func VideoFeedController(c *gin.Context) {
 	token, ok := c.GetQuery("token")
 
@@ -56,12 +57,13 @@ func VideoFeedController(c *gin.Context) {
 		})
 	}
 }
+
+// 获取发布列表
 func PublishListController(c *gin.Context) {
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
 	//判断用户id类型是否正确
 	if !ok {
-		util.PrintLog("用户id类型错误")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "用户id类型错误",
@@ -72,7 +74,6 @@ func PublishListController(c *gin.Context) {
 	videoList, err := service.PublishListService(userId)
 
 	if err != nil {
-		util.PrintLog("获取发布列表失败")
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
 			StatusMsg:  "获取发布列表失败: " + err.Error(),
@@ -81,33 +82,19 @@ func PublishListController(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, PublishListResponse{
-		Response: dao.Response{
+		dao.Response{
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		VideoList: *videoList,
+		*videoList,
 	})
 
-	util.PrintLog("获取发布列表成功")
 }
 
+// 发布视频
 func PublishVideoController(c *gin.Context) {
-	title := c.PostForm("title")
-
-	flag, err := util.IsHaveDirty(title)
-	if err != nil {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
-	}
-
-	if !flag {
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "标题含有敏感词",
-		})
-	}
+	_title := c.PostForm("title")
+	title, _ := util.FilterDirty(_title)
 
 	_userId, _ := c.Get("user_id")
 	userId, ok := _userId.(int64)
@@ -150,6 +137,7 @@ func PublishVideoController(c *gin.Context) {
 	})
 }
 
+// 已经登陆的情况
 func hasLogin(c *gin.Context, token string) error {
 	if claims, ok := jwt.ParseToken(token); ok {
 		if claims.ExpiresAt < time.Now().Unix() {
@@ -177,6 +165,7 @@ func hasLogin(c *gin.Context, token string) error {
 	return errors.New("token解析失败")
 }
 
+// 未登录的情况
 func notLogin(c *gin.Context) error {
 	_latestTime := c.Query("latest_time")
 	var latestTime time.Time

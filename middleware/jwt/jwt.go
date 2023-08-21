@@ -1,11 +1,11 @@
 package jwt
 
 import (
-	"fmt"
 	"net/http"
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/util"
+	tiktokLog "tiktok/util/log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -64,8 +64,7 @@ func Auth() gin.HandlerFunc {
 			tokenStr = c.PostForm("token")
 		}
 		if len(tokenStr) == 0 {
-			util.PrintLog("token为空")
-			util.PrintLog(fmt.Sprintf("token is %v", tokenStr))
+			tiktokLog.Error("token为空", tokenStr)
 			c.JSON(http.StatusUnauthorized, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "unauthorized: 用户不存在或者未登录",
@@ -77,7 +76,7 @@ func Auth() gin.HandlerFunc {
 		token, ok := ParseToken(tokenStr)
 		// 如果token无效
 		if !ok {
-			util.PrintLog("token无效")
+			tiktokLog.Error("token无效", tokenStr)
 			c.JSON(http.StatusForbidden, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "forbidden: token无效",
@@ -88,7 +87,7 @@ func Auth() gin.HandlerFunc {
 
 		// 如果token过期
 		if time.Now().Unix() > token.ExpiresAt {
-			util.PrintLog("token已过期")
+			tiktokLog.Error("token已过期", token)
 			c.JSON(http.StatusOK, dao.Response{
 				StatusCode: -1,
 				StatusMsg:  "token已过期",
@@ -98,9 +97,17 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 		// 将userId写入上下文
-		util.PrintLog(fmt.Sprintf(" token没问题 user_id is %v", token.UserId))
 		c.Set("user_id", token.UserId)
 		// 继续执行
+		c.Next()
+	}
+}
+
+func FilterDirtyMessage() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		_content := c.Query("content")
+		content, _ := util.FilterDirty(_content)
+		c.Set("content", content)
 		c.Next()
 	}
 }

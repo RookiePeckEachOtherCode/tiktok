@@ -156,3 +156,12 @@ func (r *Redis) AddAllMessage(msgName string, bytes []byte, createTime int64) {
 func (r *Redis) GetMessage(msgName string) (string, error) {
 	return r.Client.LPop(ctx, msgName).Result()
 }
+
+// flushall
+
+func RedisFlushAll() {
+	fav.FlushAll(ctx)
+	relation.FlushAll(ctx)
+	liked.FlushAll(ctx)
+	msgs.FlushAll(ctx)
+}

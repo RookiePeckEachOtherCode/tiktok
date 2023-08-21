@@ -2,9 +2,8 @@ package service
 
 import (
 	"errors"
-	"log"
 	"tiktok/dao"
-	"tiktok/util"
+	tiktokLog "tiktok/util/log"
 )
 
 const (
@@ -19,13 +18,12 @@ type FavoriteListReponse struct {
 
 func FavoriteListService(uid int64) (res *FavoriteListReponse, err error) {
 	if !dao.CheckIsExistByID(uid) {
-		log.Println("用户不存在")
+		tiktokLog.Error("用户不存在,uid: ", uid)
 		return nil, errors.New("用户不存在")
 	}
 
 	favoriteList, err := dao.GetFavoriteList(uid)
 	if err != nil {
-		log.Println("获取喜欢列表失败:", err)
 		return nil, err
 	}
 
@@ -37,7 +35,6 @@ func FavoriteListService(uid int64) (res *FavoriteListReponse, err error) {
 		//因为是点赞列表，所有的状态都是点赞状态
 		favoriteList[i].IsFavorite = true
 	}
-	log.Println("获取喜欢列表成功")
 	return &FavoriteListReponse{
 		Response: dao.Response{
 			StatusCode: 0,
@@ -50,7 +47,6 @@ func FavoriteListService(uid int64) (res *FavoriteListReponse, err error) {
 
 func FavoriteActionService(userId, videoId, act int64) error {
 	if err := favoriteActionCheck(userId, videoId, act); err != nil {
-		util.PrintLog(err.Error())
 		return err
 	}
 
@@ -65,12 +61,15 @@ func FavoriteActionService(userId, videoId, act int64) error {
 
 func favoriteActionCheck(userId, videoId, act int64) error {
 	if userId <= 0 {
+		tiktokLog.Error("用户不存在,userId: ", userId)
 		return errors.New("用户不存在")
 	}
 	if act != Fav && act != UnFav {
+		tiktokLog.Error("act参数错误:未定义的操作类型,act: ", act)
 		return errors.New("act参数错误:未定义的操作类型")
 	}
 	if act == Fav && (&dao.UserInfo{ID: userId}).GetIsFavorite(videoId) { //点赞动作，视频已经被点赞，就不用再点赞了
+		tiktokLog.Error("视频已经被点赞,videoId: ", videoId)
 		return errors.New("视频已经被点赞")
 	}
 	return nil

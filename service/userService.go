@@ -7,6 +7,7 @@ import (
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	"tiktok/util/tos"
+	tiktokLog "tiktok/util/log"
 )
 
 type UserInfoResponse struct {
@@ -72,16 +73,16 @@ func UserRegisterService(name, password string) (string, int64, error) {
 
 func userLoginCheck(name string) error {
 	if !dao.CheckIsExistByName(name) {
+		tiktokLog.Error("该用户不存在: userName: ", name)
 		return errors.New("该用户不存在")
 	}
 	return nil
 }
 
 func registerCheck(name string) error {
-
 	if dao.IsExistUserLoginInfoByName(name) {
+		tiktokLog.Error("该用户名已被注册: userName: ", name)
 		return errors.New("该用户名已被注册")
 	}
-
 	return nil
 }

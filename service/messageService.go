@@ -10,7 +10,6 @@ import (
 )
 
 func ChatActionService(userId, toUserId int64, content string) error {
-	//TODO 敏感词过滤
 
 	if err := pushToRedis(userId, toUserId, content); err != nil {
 		log.Println("保存到redis失败 : ", err)
