@@ -23,8 +23,8 @@ type UserRegisterResponse struct {
 }
 
 type GetUserInfoResponse struct {
-	Response dao.Response // 用户鉴权token
-	USerInfo dao.UserInfo `json:"user"` // 用户id
+	dao.Response               // 用户鉴权token
+	dao.UserInfo `json:"user"` // 用户id
 }
 
 // 用户登录操作
@@ -128,10 +128,10 @@ func UserInfoController(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, GetUserInfoResponse{
-		Response: dao.Response{
+		dao.Response{
 			StatusCode: 0,
 			StatusMsg:  "用户信息获取成功",
 		},
-		USerInfo: *USerInfo,
+		*USerInfo,
 	})
 }
