@@ -23,8 +23,8 @@ type UserRegisterResponse struct {
 }
 
 type GetUserInfoResponse struct {
-	dao.Response               // 用户鉴权token
-	dao.UserInfo `json:"user"` // 用户id
+	dao.Response              // 用户鉴权token
+	USerInfo     dao.UserInfo `json:"user"` // 用户id
 }
 
 // 用户登录操作
