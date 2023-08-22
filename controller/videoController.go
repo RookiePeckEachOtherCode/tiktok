@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -22,7 +21,8 @@ import (
 
 type FeedResponse struct {
 	dao.Response
-	*service.FeedVideoFlow
+	VideoList []*dao.Video `json:"video_list"`
+	NextTime  int64        `json:"next_time"`
 }
 type PublishListResponse struct {
 	dao.Response
@@ -39,30 +39,34 @@ type VideoInfos struct {
 
 // 获取feed流
 func VideoFeedController(c *gin.Context) {
-	token, ok := c.GetQuery("token")
-
-	if !ok {
-		if err := notLogin(c); err != nil {
-			log.Println("feed:", err)
-			c.JSON(http.StatusOK, dao.Response{
-				StatusCode: 1,
-				StatusMsg:  "获取feed失败: " + err.Error(),
-			})
-		}
+	inputTime := c.Query("latest_time")
+	var latestTime time.Time
+	if len(inputTime) == 0 {
+		_latestTime, _ := strconv.ParseInt(inputTime, 10, 64)
+		_latestTime /= 1000
+		latestTime = time.Unix(_latestTime, 0)
+	} else {
+		latestTime = time.Now()
+	}
+	token := c.Query("token")
+	if len(token) == 0 {
+		notLogin(latestTime, c)
 		return
 	}
-	if err := hasLogin(c, token); err != nil {
-		log.Println("feed:", err)
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "获取feed失败: " + err.Error(),
-		})
-	}
+	hasLogin(token, latestTime, c)
 }
 
 // 获取发布列表
 func PublishListController(c *gin.Context) {
-	_userId, _ := c.Get("user_id")
+	_userId, exi := c.Get("user_id")
+	if !exi {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 0,
+			StatusMsg:  "获取用户id失败",
+		})
+		return
+	}
+
 	userId, ok := _userId.(int64)
 	//判断用户id类型是否正确
 	if !ok {
@@ -150,53 +154,66 @@ func PublishVideoController(c *gin.Context) {
 }
 
 // 已经登陆的情况
-func hasLogin(c *gin.Context, token string) error {
-	if claims, ok := jwt.ParseToken(token); ok {
-		if claims.ExpiresAt < time.Now().Unix() {
-			return errors.New("登陆过期")
-		}
-		_latestTime := c.Query("latest_time")
-		var latestTime time.Time
-		intTime, err := strconv.ParseInt(_latestTime, 10, 64)
-		if err != nil {
-			latestTime = time.Unix(0, intTime*1e6)
-		}
-		videoList, err := service.VideoFeedService(claims.UserId, latestTime)
-		if err != nil {
-			return err
-		}
-		c.JSON(http.StatusOK, FeedResponse{
-			Response: dao.Response{
-				StatusCode: 0,
-				StatusMsg:  "success",
-			},
-			FeedVideoFlow: videoList,
-		})
-		return nil
-	}
-	return errors.New("token解析失败")
-}
+func hasLogin(token string, latestTime time.Time, c *gin.Context) {
+	_userId, _ := jwt.ParseToken(token)
+	userId := _userId.UserId
 
-// 未登录的情况
-func notLogin(c *gin.Context) error {
-	_latestTime := c.Query("latest_time")
-	var latestTime time.Time
-	intTime, err := strconv.ParseInt(_latestTime, 10, 64)
-	if err == nil {
-		latestTime = time.Unix(0, intTime*1e6)
-	}
-	videoList, err := service.VideoFeedService(0, latestTime)
+	videos, err := service.VideoFeedService(userId, time.Now())
 	if err != nil {
-		return err
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  "获取feed流失败: " + err.Error(),
+		})
+
+		return
 	}
+
+	nextTime, err := dao.GetNextTimeByVideoId((*videos)[0].ID)
+	if err != nil {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  "获取nextTime 失败: " + err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, FeedResponse{
-		Response: dao.Response{
+		dao.Response{
 			StatusCode: 0,
 			StatusMsg:  "success",
 		},
-		FeedVideoFlow: videoList,
+		*videos,
+		nextTime.UnixNano() / 1e6,
 	})
-	return nil
+
+}
+
+// 未登录的情况
+func notLogin(latestTime time.Time, c *gin.Context) {
+	videos, err := service.VideoFeedService(0, time.Now())
+	if err != nil {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  "获取feed流失败: " + err.Error(),
+		})
+		return
+	}
+	nextTime, err := dao.GetNextTimeByVideoId((*videos)[0].ID)
+	if err != nil {
+		c.JSON(http.StatusOK, dao.Response{
+			StatusCode: 1,
+			StatusMsg:  "获取nextTime失败: " + err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, FeedResponse{
+		dao.Response{
+			StatusCode: 0,
+			StatusMsg:  "success",
+		},
+		*videos,
+		nextTime.UnixNano() / 1e6,
+	})
 }
 
 func getVideoInfo(file *multipart.FileHeader) *VideoInfos {
