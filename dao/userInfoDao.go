@@ -21,7 +21,7 @@ type UserInfo struct {
 	FavorVideos     []*Video    `json:"-" gorm:"many2many:user_favor_videos;"`          //用户与喜欢视频之间的多对多
 	Comments        []*Comment  `json:"-"`                                              //用户与评论的一对多
 	TotalFavorite   int64       `json:"total_favorited" gorm:"-"`                       //用户获赞数
-	WorkCount       int64       `json:"work_count" gorm:"-"`                            //作品数
+	WorkCount       int64       `json:"work_count,omitempty" gorm:"-"`                  //用户作品数
 	Avatar          string      `json:"avatar" gorm:"avatar,omitempty"`                 //头像
 	FavoriteCount   int64       `json:"favorite_count" gorm:"-"`                        //用户喜欢的视频数
 	BackgroundImage string      `json:"background_image" gorm:"-"`                      //背景图片
@@ -44,6 +44,7 @@ func GetUserInfoById(userId int64) (*UserInfo, error) {
 	userInfo.Signature = "这个人很懒，什么都没写"
 	userInfo.FavoriteCount = redis.New(redis.FAVORITE).GetUserFavoriteCount(userId)
 	userInfo.TotalFavorite = redis.New(redis.LIKED).GetUserReceivedLikeCount(userId)
+	userInfo.WorkCount = GetWorkCountById(userId)
 	return &userInfo, nil
 }
 
@@ -266,4 +267,11 @@ func GetNewestMessageByUserIdAndToUserID(userId int64, toUserId int64) (string, 
 		log.Println("当前用户接收的消息", message.Content)
 		return message.Content, 0, nil
 	}
+}
+
+func GetWorkCountById(uid int64) int64 {
+	var count int64
+	DB.Model(&Video{}).Where("user_info_id = ?", uid).Count(&count)
+
+	return count
 }
