@@ -18,11 +18,11 @@ const MAX_VIDEO_CNT = 30
 
 // mysql的连接信息
 const (
-	DB_USER   = "root"    // 数据库用户名
-	DB_PASSWD = "db22455" //数据库密码
-	DB_URL    = "mysql"   // 数据库地址L
-	PORT      = "3306"    // 数据库端口
-	DB_NAME   = "tiktok"  //数据库名称
+	DB_USER   = "root"      // 数据库用户名
+	DB_PASSWD = "db22455"   //数据库密码
+	DB_URL    = "mysql" // 数据库地址
+	PORT      = "3306"      // 数据库端口
+	DB_NAME   = "tiktok"    //数据库名称
 )
 
 // GetDBInfo 返回mysql的连接信息
