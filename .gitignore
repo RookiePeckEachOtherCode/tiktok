@@ -3,5 +3,8 @@ config.yml
 .idea
 static/assets/cover
 static/assets/video
+*.log
+tiktok.log
+gin.log
 gin.log
 tiktok.log

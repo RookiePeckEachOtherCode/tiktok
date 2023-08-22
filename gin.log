@@ -24,17 +24,3 @@
 [GIN-debug] GET    /douyin/relation/friend/list/ --> tiktok/controller.FriendListController (4 handlers)
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8080
-[GIN] 2023/08/21 - 21:00:58 | 200 |  129.834112ms |     192.168.1.3 | GET      "/static/assets/video/3b0eac19-82aa-479f-ab9e-ac70b23a0b8c.mp4"
-[GIN] 2023/08/21 - 21:00:59 | 200 |     9.91397ms |     192.168.1.3 | GET      "/douyin/feed?latest_time=1692621999000"
-[GIN] 2023/08/21 - 21:00:59 | 200 |      73.682µs |     192.168.1.3 | GET      "/douyin/publish/list/?token=&user_id=5"
-[GIN] 2023/08/21 - 21:00:59 | 200 |       39.67µs |     192.168.1.3 | GET      "/douyin/favorite/list/?token=&user_id=5"
-[GIN] 2023/08/21 - 21:00:59 | 200 |    6.155531ms |     192.168.1.3 | GET      "/douyin/feed?latest_time=1692621999000"
-[GIN] 2023/08/21 - 21:00:59 | 200 |  103.976563ms |     192.168.1.3 | GET      "/static/assets/video/3b0eac19-82aa-479f-ab9e-ac70b23a0b8c.mp4"
-[GIN] 2023/08/21 - 21:01:00 | 200 |    6.660973ms |     192.168.1.3 | GET      "/douyin/feed?latest_time=1692621999000"
-[GIN] 2023/08/21 - 21:01:01 | 200 |    6.410732ms |     192.168.1.3 | GET      "/douyin/feed?latest_time=1692621999000"
-[GIN] 2023/08/21 - 21:01:01 | 200 |       13.34µs |     192.168.1.3 | GET      "/douyin/favorite/list/?token=&user_id=5"
-[GIN] 2023/08/21 - 21:01:01 | 200 |       9.988µs |     192.168.1.3 | GET      "/douyin/publish/list/?token=&user_id=5"
-[GIN] 2023/08/21 - 21:01:01 | 200 |  151.720276ms |     192.168.1.3 | GET      "/static/assets/video/3b0eac19-82aa-479f-ab9e-ac70b23a0b8c.mp4"
-[GIN] 2023/08/21 - 21:01:03 | 200 |  173.748706ms |     192.168.1.3 | GET      "/static/assets/video/3b0eac19-82aa-479f-ab9e-ac70b23a0b8c.mp4"
-[GIN] 2023/08/21 - 21:01:49 | 200 |  231.632605ms |     192.168.1.3 | GET      "/static/assets/video/3b0eac19-82aa-479f-ab9e-ac70b23a0b8c.mp4"
