@@ -51,18 +51,18 @@ func UserRegisterService(name, password string) (string, int64, error) {
 		Avatar:        getRandomAvatar(),
 	}
 
+	// 保存用户信息到数据库
+	if err := dao.AddUserInfo(&userinfo); err != nil {
+		tiktokLog.Error("AddUserINfo error:%v", err)
+		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
+	}
+
 	// 生成token
 	token, err := jwt.NewToken(userinfo.ID)
 
 	if err != nil {
+		tiktokLog.Error("NewToken error:%v", err)
 		return "", 0, fmt.Errorf("NewToken error:%v", err)
-	}
-
-	// 保存用户信息到数据库
-	err = dao.AddUserInfo(&userinfo)
-
-	if err != nil {
-		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
 	}
 
 	return token, userinfo.ID, nil
