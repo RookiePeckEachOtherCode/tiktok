@@ -6,8 +6,8 @@ import (
 	"log"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
-	"tiktok/util/tos"
 	tiktokLog "tiktok/util/log"
+	"tiktok/util/tos"
 )
 
 type UserInfoResponse struct {
@@ -52,18 +52,18 @@ func UserRegisterService(name, password string) (string, int64, error) {
 	}
 
 	log.Println("userinfo_avatar", userinfo.Avatar)
+
+	// 保存用户信息到数据库
+	if err := dao.AddUserInfo(&userinfo); err != nil {
+		tiktokLog.Error("AddUserInfo error:%v", err)
+		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
+	}
+
 	// 生成token
 	token, err := jwt.NewToken(userinfo.ID)
 
 	if err != nil {
 		return "", 0, fmt.Errorf("NewToken error:%v", err)
-	}
-
-	// 保存用户信息到数据库
-	err = dao.AddUserInfo(&userinfo)
-
-	if err != nil {
-		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
 	}
 
 	return token, userinfo.ID, nil
