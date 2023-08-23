@@ -87,7 +87,7 @@ ER图
 3. 运行```go build -o tiktok && ./tiktok```
 ### Docker部署
 1. 修改```docker-compose.yml```中的配置
-2. 运行```docker-compose up -d
+2. 运行```docker-compose up -d```
 ## 后续期望
 - 使用微服务
 - 使用消息队列
