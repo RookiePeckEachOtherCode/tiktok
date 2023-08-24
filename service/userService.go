@@ -3,11 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
-	"math/rand"
-	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	tiktokLog "tiktok/util/log"
+	"tiktok/util/oss"
 )
 
 type UserInfoResponse struct {
@@ -48,12 +47,12 @@ func UserRegisterService(name, password string) (string, int64, error) {
 	userinfo := dao.UserInfo{
 		UserLoginInfo: &userLogin,
 		Name:          name,
-		Avatar:        getRandomAvatar(),
+		Avatar:        oss.GetRandomAvatar(),
 	}
 
 	// 保存用户信息到数据库
 	if err := dao.AddUserInfo(&userinfo); err != nil {
-		tiktokLog.Error("AddUserINfo error:%v", err)
+		tiktokLog.Error("AddUserInfo error:%v", err)
 		return "", 0, fmt.Errorf("AddUserInfo error:%v", err)
 	}
 
@@ -61,7 +60,6 @@ func UserRegisterService(name, password string) (string, int64, error) {
 	token, err := jwt.NewToken(userinfo.ID)
 
 	if err != nil {
-		tiktokLog.Error("NewToken error:%v", err)
 		return "", 0, fmt.Errorf("NewToken error:%v", err)
 	}
 
@@ -84,11 +82,4 @@ func registerCheck(name string) error {
 		return errors.New("该用户名已被注册")
 	}
 	return nil
-}
-
-func getRandomAvatar() string {
-	//生成一个[1,8]的随机数
-	randNum := rand.Intn(8) + 1
-	path := fmt.Sprintf("http://%v:%v/%v/%v.jpg", configs.LAN_IP, configs.GIN_PORT, configs.AVATAR_SAVE_PATH, randNum)
-	return path
 }

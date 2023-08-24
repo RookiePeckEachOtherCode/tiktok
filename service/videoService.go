@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/redis"
 	"tiktok/util"
@@ -49,19 +48,13 @@ func PublishListService(userId int64) (*[]dao.Video, error) {
 	return videos, nil
 }
 
-func PublishVideoService(userID int64, videoName, coverName, title string) error {
-	v := &SaveVideoInfo{userId: userID, title: title}
-
-	v.videoPath = util.GetFileUrl(videoName, configs.VIDEO_SAVE_PATH)
-	v.coverPath = util.GetFileUrl(coverName, configs.VIDEO_COVER_SAVE_PATH)
-
+func PublishVideoService(userID int64, videoSavePath, coverSavePath, title string) error {
 	err := dao.NewVideo(&dao.Video{
-		Title:      v.title,
-		UserInfoID: v.userId,
-		PlayURL:    v.videoPath,
-		CoverURL:   v.coverPath,
+		Title:      title,
+		UserInfoID: userID,
+		PlayURL:    videoSavePath,
+		CoverURL:   coverSavePath,
 	})
-
 	return err
 }
 

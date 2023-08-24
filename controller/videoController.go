@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -9,11 +10,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"tiktok/configs"
 	"tiktok/dao"
 	"tiktok/middleware/jwt"
 	"tiktok/service"
 	"tiktok/util"
+	"tiktok/util/oss"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -125,26 +128,16 @@ func PublishVideoController(c *gin.Context) {
 		return
 	}
 
-	videoInfo := getVideoInfo(data)
+	videoInfo, err := getVideoInfos(data)
 
-	if err := videoInfo.saveVideo(c); err != nil {
+	if err != nil {
 		c.JSON(http.StatusOK, dao.Response{
 			StatusCode: 1,
-			StatusMsg:  "视频保存失败: " + err.Error(),
+			StatusMsg:  "视频获取失败: " + err.Error(),
 		})
-		log.Println("视频保存失败: ", err)
-		return
-	}
-	if err := videoInfo.saveCover(); err != nil {
-		log.Println("封面保存失败: ", err)
-		c.JSON(http.StatusOK, dao.Response{
-			StatusCode: 1,
-			StatusMsg:  "封面保存失败: " + err.Error(),
-		})
-		return
 	}
 	//持久化
-	if err := service.PublishVideoService(userId, videoInfo.VideoName, videoInfo.CoverName, title); err != nil {
+	if err := service.PublishVideoService(userId, videoInfo.VideoSavePath, videoInfo.CoverSavePath, title); err != nil {
 		log.Println("视频持久化失败: ", err)
 	}
 	c.JSON(http.StatusOK, dao.Response{
@@ -255,5 +248,30 @@ func (v VideoInfos) saveCover() error {
 		return err
 	}
 
+	return nil
+}
+
+func getVideoInfos(file *multipart.FileHeader) (*VideoInfos, error) {
+	videoInfo := VideoInfos{file: file}
+	videoInfo.file.Filename = util.NewFileName(videoInfo.file.Filename)
+
+	if err := videoInfo.SaveVideo(); err != nil {
+		return nil, err
+	}
+	coverName := strings.Split(videoInfo.file.Filename, ".")[0]
+	videoInfo.CoverName = "cover" + coverName + ".jpg"
+	videoInfo.CoverSavePath = configs.CoverBucketUrl + videoInfo.CoverName
+	return &videoInfo, nil
+}
+
+func (v *VideoInfos) SaveVideo() error {
+	if v.file == nil {
+		return errors.New("视频文件为空")
+	}
+	path, err := oss.UploadToQiNiu(v.file)
+	if err != nil {
+		return err
+	}
+	v.VideoSavePath = *path
 	return nil
 }
