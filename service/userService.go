@@ -88,7 +88,7 @@ func registerCheck(name string) error {
 
 func getRandomAvatar() string {
 	//生成一个[1,8]的随机数
-	randNum := rand.Intn(9)
+	randNum := rand.Intn(8) + 1
 	path := fmt.Sprintf("http://%v:%v/%v/%v.jpg", configs.LAN_IP, configs.GIN_PORT, configs.AVATAR_SAVE_PATH, randNum)
 	return path
 }
