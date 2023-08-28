@@ -1,4 +1,4 @@
-# 字节挑动青训营-Go语言实战项目 极简抖音
+# 字节跳动青训营-Go语言实战项目 极简抖音
 [对象存储版本](https://github.com/RookiePeckEachOtherCode/tiktok/tree/oss)
 ## 技术选型
 - GORM
